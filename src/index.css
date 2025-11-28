@@ -175,3 +175,50 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos para handles de resize do react-rnd */
+.react-resizable-handle {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  z-index: 15;
+}
+
+.react-rnd:hover .react-resizable-handle,
+.react-rnd.dragging .react-resizable-handle,
+.react-rnd.resizing .react-resizable-handle {
+  opacity: 1;
+}
+
+.react-resizable-handle-se,
+.react-resizable-handle-s,
+.react-resizable-handle-e,
+.react-resizable-handle-ne {
+  background: rgba(99, 102, 241, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.react-resizable-handle-se {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 2px;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.react-resizable-handle-s {
+  height: 8px !important;
+  cursor: ns-resize !important;
+}
+
+.react-resizable-handle-e {
+  width: 8px !important;
+  cursor: ew-resize !important;
+}
+
+.react-resizable-handle-ne {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 2px;
+  right: 0 !important;
+  top: 0 !important;
+}

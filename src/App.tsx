@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Rnd } from 'react-rnd'
 import TwitchPlayer from './components/TwitchPlayer'
 import KickPlayer from './components/KickPlayer'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,19 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {
+	type CustomLayout,
+	type Rectangle,
+	calculateTilePositions,
+	enforceAspectRatio,
+	isValidPosition,
+} from '@/lib/layoutUtils'
+import {
+	clearCustomLayout,
+	loadCustomLayout,
+	saveCustomLayout,
+} from '@/hooks/useLocalStorage'
+import { cn } from '@/lib/utils'
 
 type Platform = 'twitch' | 'kick'
 
@@ -143,6 +157,9 @@ function App() {
 		w: 0,
 		h: 0,
 	})
+	const [customLayout, setCustomLayout] = useState<CustomLayout>(
+		() => loadCustomLayout(initial.streams) ?? {}
+	)
 
 	const orderedStreams = useMemo(() => {
 		if (streams.length === 0) return []
@@ -173,6 +190,20 @@ function App() {
 		return map
 	}, [layoutOrder])
 
+	// Entrar em modo custom automaticamente se houver streams
+	// Isso permite redimensionar desde o início
+	const isCustomMode = streams.length > 0
+
+	const allTilePositions = useMemo(() => {
+		return calculateTilePositions(
+			streams,
+			layoutOrder,
+			customLayout,
+			tileSize,
+			cols
+		)
+	}, [streams, layoutOrder, customLayout, tileSize, cols])
+
 	useUrlSync(orderedStreams, cols, muted)
 
 	const addStream = () => {
@@ -201,13 +232,22 @@ function App() {
 		}
 	}
 	const resetLayout = () => {
-		setStreams([])
-		setLayoutOrder([])
-		setCols(2)
-		setMuted(false)
-		const clean = `${window.location.origin}${window.location.pathname}`
-		window.history.replaceState({}, '', clean)
+		// Apenas resetar customizações de layout (não limpar streams)
+		setCustomLayout({})
+		clearCustomLayout(streams)
 	}
+
+	// Função opcional para limpar tudo (não utilizada no momento)
+	// Para usar, adicione um botão com onClick={clearAll}
+	// const clearAll = () => {
+	// 	setStreams([])
+	// 	setLayoutOrder([])
+	// 	setCustomLayout({})
+	// 	setCols(2)
+	// 	setMuted(false)
+	// 	const clean = `${window.location.origin}${window.location.pathname}`
+	// 	window.history.replaceState({}, '', clean)
+	// }
 
 	const renameStreamChannel = (id: string, rawValue: string) => {
 		const normalized = normalizeChannel(rawValue)
@@ -258,6 +298,62 @@ function App() {
 
 	const reloadStream = (id: string) =>
 		setReloadById(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }))
+
+	const handleResizeStop = (
+		streamId: string,
+		ref: HTMLElement,
+		position: { x: number; y: number }
+	) => {
+		let newRect: Rectangle = {
+			x: position.x,
+			y: position.y,
+			w: ref.offsetWidth,
+			h: ref.offsetHeight,
+		}
+
+		// Garantir aspect ratio 16:9
+		newRect = enforceAspectRatio(newRect)
+
+		const containerBounds = {
+			w: containerRef.current?.clientWidth ?? window.innerWidth,
+			h: containerRef.current?.clientHeight ?? window.innerHeight,
+		}
+
+		if (isValidPosition(streamId, newRect, allTilePositions, containerBounds)) {
+			setCustomLayout(prev => ({
+				...prev,
+				[streamId]: newRect,
+			}))
+		} else {
+			console.warn('Invalid resize - would overlap or exceed bounds')
+		}
+	}
+
+	const handleDragStop = (streamId: string, data: { x: number; y: number }) => {
+		const currentRect = allTilePositions.get(streamId)
+		if (!currentRect) return
+
+		const newRect: Rectangle = {
+			x: data.x,
+			y: data.y,
+			w: currentRect.w,
+			h: currentRect.h,
+		}
+
+		const containerBounds = {
+			w: containerRef.current?.clientWidth ?? window.innerWidth,
+			h: containerRef.current?.clientHeight ?? window.innerHeight,
+		}
+
+		if (isValidPosition(streamId, newRect, allTilePositions, containerBounds)) {
+			setCustomLayout(prev => ({
+				...prev,
+				[streamId]: newRect,
+			}))
+		} else {
+			console.warn('Invalid drag - would overlap or exceed bounds')
+		}
+	}
 
 	// Compute tile size to fit viewport without scroll
 	useEffect(() => {
@@ -314,6 +410,13 @@ function App() {
 			ro.disconnect()
 		}
 	}, [streams.length, cols, headerOpen])
+
+	// Auto-save customLayout to localStorage
+	useEffect(() => {
+		if (Object.keys(customLayout).length > 0) {
+			saveCustomLayout(streams, customLayout)
+		}
+	}, [customLayout, streams])
 
 	// Collapse/expand header when streams count crosses 0 <-> >0
 	const prevCountRef = useRef<number>(streams.length)
@@ -467,7 +570,7 @@ function App() {
 											</Button>
 										</TooltipTrigger>
 										<TooltipContent>
-											Limpar canais, colunas e estado
+											Voltar ao grid padrão (mantém canais)
 										</TooltipContent>
 									</Tooltip>
 								</TooltipProvider>
@@ -492,89 +595,198 @@ function App() {
 				) : null}
 
 				<div
-					className="mt-3 grid gap-2 justify-center"
-					style={{ gridTemplateColumns: `repeat(${cols}, ${tileSize.w}px)` }}
+					className={cn(
+						'mt-3 gap-2 justify-center',
+						isCustomMode ? 'relative' : 'grid'
+					)}
+					style={
+						isCustomMode
+							? { position: 'relative', minHeight: '100vh' }
+							: { gridTemplateColumns: `repeat(${cols}, ${tileSize.w}px)` }
+					}
 				>
-					{streams.map((s, idx) => (
-						<Card
-							key={s.id}
-							style={{ order: layoutIndexMap.get(s.id) ?? idx }}
-							draggable
-							onDragStart={() => onDragStart(s.id)}
-							onDragEnter={() => onDragEnter(s.id)}
-							onDragLeave={() => onDragLeave(s.id)}
-							onDragOver={onDragOver}
-							onDrop={() => onDrop(s.id)}
-							className={[
-								'relative overflow-hidden cursor-move bg-black p-0 border-0 box-border group',
-								dragOverId === s.id
-									? 'outline outline-2 outline-indigo-500'
-									: '',
-								dragId === s.id ? 'opacity-80' : '',
-							].join(' ')}
-						>
-							<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto">
-								<span className="ml-1 uppercase tracking-wide">
-									{s.platform}
-								</span>
+					{streams.map((s, idx) => {
+						const position = allTilePositions.get(s.id)
 
-								<EditableChannelLabel
-									channel={s.channel}
-									onCommit={value => renameStreamChannel(s.id, value)}
-								/>
-							</div>
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											onClick={() => reloadStream(s.id)}
-											variant="outline"
-											size="icon"
-											className="absolute top-1.5 right-10 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
-											aria-label="Recarregar stream"
-										>
-											<RotateCw className="size-4" />
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>Recarregar stream</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Button
-											onClick={() => removeStream(s.id)}
-											variant="destructive"
-											size="icon"
-											className="absolute top-1.5 right-1.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
-										>
-											×
-										</Button>
-									</TooltipTrigger>
-									<TooltipContent>Remover stream</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-							<div
-								style={{ width: `${tileSize.w}px`, height: `${tileSize.h}px` }}
+						if (isCustomMode && position) {
+							// Modo customizado: usar Rnd
+							return (
+								<Rnd
+									key={s.id}
+									size={{ width: position.w, height: position.h }}
+									position={{ x: position.x, y: position.y }}
+									lockAspectRatio={16 / 9}
+									bounds="parent"
+									onResizeStop={(_e, _dir, ref, _delta, pos) =>
+										handleResizeStop(s.id, ref, pos)
+									}
+									onDragStop={(_e, data) => handleDragStop(s.id, data)}
+									enableResizing={{
+										top: false,
+										right: true,
+										bottom: true,
+										left: false,
+										topRight: true,
+										bottomRight: true,
+										bottomLeft: false,
+										topLeft: false,
+									}}
+								>
+									<Card className="relative overflow-hidden bg-black p-0 border-0 box-border group h-full w-full">
+										<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto">
+											<span className="ml-1 uppercase tracking-wide">
+												{s.platform}
+											</span>
+
+											<EditableChannelLabel
+												channel={s.channel}
+												onCommit={value => renameStreamChannel(s.id, value)}
+											/>
+										</div>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														onClick={() => reloadStream(s.id)}
+														variant="outline"
+														size="icon"
+														className="absolute top-1.5 right-10 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+														aria-label="Recarregar stream"
+													>
+														<RotateCw className="size-4" />
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>Recarregar stream</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Button
+														onClick={() => removeStream(s.id)}
+														variant="destructive"
+														size="icon"
+														className="absolute top-1.5 right-1.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+													>
+														×
+													</Button>
+												</TooltipTrigger>
+												<TooltipContent>Remover stream</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<div className="w-full h-full">
+											{s.platform === 'twitch' ? (
+												<TwitchPlayer
+													key={`${s.id}:${reloadById[s.id] || 0}`}
+													id={s.id}
+													channel={s.channel}
+													parent={parentHost}
+													muted={muted}
+												/>
+											) : (
+												<KickPlayer
+													key={`${s.id}:${reloadById[s.id] || 0}`}
+													channel={s.channel}
+													muted={muted}
+												/>
+											)}
+										</div>
+									</Card>
+								</Rnd>
+							)
+						}
+
+						// Modo grid padrão
+						return (
+							<Card
+								key={s.id}
+								style={{ order: layoutIndexMap.get(s.id) ?? idx }}
+								draggable={!isCustomMode}
+								onDragStart={
+									!isCustomMode ? () => onDragStart(s.id) : undefined
+								}
+								onDragEnter={
+									!isCustomMode ? () => onDragEnter(s.id) : undefined
+								}
+								onDragLeave={
+									!isCustomMode ? () => onDragLeave(s.id) : undefined
+								}
+								onDragOver={!isCustomMode ? onDragOver : undefined}
+								onDrop={!isCustomMode ? () => onDrop(s.id) : undefined}
+								className={[
+									'relative overflow-hidden cursor-move bg-black p-0 border-0 box-border group',
+									dragOverId === s.id
+										? 'outline outline-2 outline-indigo-500'
+										: '',
+									dragId === s.id ? 'opacity-80' : '',
+								].join(' ')}
 							>
-								{s.platform === 'twitch' ? (
-									<TwitchPlayer
-										key={`${s.id}:${reloadById[s.id] || 0}`}
-										id={s.id}
+								<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto">
+									<span className="ml-1 uppercase tracking-wide">
+										{s.platform}
+									</span>
+
+									<EditableChannelLabel
 										channel={s.channel}
-										parent={parentHost}
-										muted={muted}
+										onCommit={value => renameStreamChannel(s.id, value)}
 									/>
-								) : (
-									<KickPlayer
-										key={`${s.id}:${reloadById[s.id] || 0}`}
-										channel={s.channel}
-										muted={muted}
-									/>
-								)}
-							</div>
-						</Card>
-					))}
+								</div>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												onClick={() => reloadStream(s.id)}
+												variant="outline"
+												size="icon"
+												className="absolute top-1.5 right-10 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+												aria-label="Recarregar stream"
+											>
+												<RotateCw className="size-4" />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>Recarregar stream</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												onClick={() => removeStream(s.id)}
+												variant="destructive"
+												size="icon"
+												className="absolute top-1.5 right-1.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+											>
+												×
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>Remover stream</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+								<div
+									style={{
+										width: `${tileSize.w}px`,
+										height: `${tileSize.h}px`,
+									}}
+								>
+									{s.platform === 'twitch' ? (
+										<TwitchPlayer
+											key={`${s.id}:${reloadById[s.id] || 0}`}
+											id={s.id}
+											channel={s.channel}
+											parent={parentHost}
+											muted={muted}
+										/>
+									) : (
+										<KickPlayer
+											key={`${s.id}:${reloadById[s.id] || 0}`}
+											channel={s.channel}
+											muted={muted}
+										/>
+									)}
+								</div>
+							</Card>
+						)
+					})}
 				</div>
 			</div>
 		</>
