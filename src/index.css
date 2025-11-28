@@ -222,3 +222,21 @@ button:focus-visible {
   right: 0 !important;
   top: 0 !important;
 }
+
+/* Scroll customizado para sidebar de histórico */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 20%);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: oklch(1 0 0 / 30%);
+}

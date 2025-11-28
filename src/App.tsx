@@ -14,6 +14,7 @@ import {
 	ChevronUp,
 	ChevronDown,
 	RotateCw,
+	History,
 } from 'lucide-react'
 import {
 	Select,
@@ -40,6 +41,8 @@ import {
 	loadCustomLayout,
 	saveCustomLayout,
 } from '@/hooks/useLocalStorage'
+import { useStreamHistory } from '@/hooks/useStreamHistory'
+import { HistorySidebar } from '@/components/HistorySidebar'
 import { cn } from '@/lib/utils'
 
 type Platform = 'twitch' | 'kick'
@@ -160,6 +163,8 @@ function App() {
 	const [customLayout, setCustomLayout] = useState<CustomLayout>(
 		() => loadCustomLayout(initial.streams) ?? {}
 	)
+	const [historyOpen, setHistoryOpen] = useState<boolean>(false)
+	const { history, addToHistory, removeFromHistory } = useStreamHistory()
 
 	const orderedStreams = useMemo(() => {
 		if (streams.length === 0) return []
@@ -220,8 +225,31 @@ function App() {
 	}
 
 	const removeStream = (id: string) => {
+		// Capturar dados antes de remover
+		const stream = streams.find(s => s.id === id)
+		if (stream) {
+			addToHistory(stream.platform, stream.channel)
+		}
+
+		// Remover do estado
 		setStreams(prev => prev.filter(s => s.id !== id))
 		setLayoutOrder(prev => prev.filter(existingId => existingId !== id))
+	}
+
+	const restoreFromHistory = (
+		platform: Platform,
+		channel: string,
+		index: number
+	) => {
+		const stream: Stream = {
+			id: `${platform}:${channel}:${Date.now()}`,
+			platform,
+			channel,
+		}
+		setStreams(prev => [...prev, stream])
+		setLayoutOrder(prev => [...prev, stream.id])
+		// Remove do histórico
+		removeFromHistory(index)
 	}
 
 	const copyShare = async () => {
@@ -409,7 +437,7 @@ function App() {
 			window.removeEventListener('resize', onResize)
 			ro.disconnect()
 		}
-	}, [streams.length, cols, headerOpen])
+	}, [streams.length, cols, headerOpen, historyOpen])
 
 	// Auto-save customLayout to localStorage
 	useEffect(() => {
@@ -444,6 +472,18 @@ function App() {
 				) : (
 					<ChevronDown aria-hidden className="size-4" />
 				)}
+			</Button>
+
+			{/* Toggle button for history sidebar */}
+			<Button
+				className="fixed top-16 right-2 z-30"
+				variant="outline"
+				size="icon"
+				aria-label={historyOpen ? 'Fechar histórico' : 'Abrir histórico'}
+				aria-pressed={historyOpen}
+				onClick={() => setHistoryOpen(o => !o)}
+			>
+				<History aria-hidden className="size-4" />
 			</Button>
 
 			{headerOpen && (
@@ -582,7 +622,10 @@ function App() {
 
 			<div
 				ref={containerRef}
-				className="px-4 sm:px-6 py-3 max-w-[1600px] mx-auto h-full box-border overflow-hidden bg-zinc-800"
+				className={cn(
+					'px-4 sm:px-6 py-3 max-w-[1600px] mx-auto h-full box-border overflow-hidden bg-zinc-800 transition-all duration-300',
+					historyOpen && 'sm:mr-[280px]'
+				)}
 			>
 				{streams.length === 0 ? (
 					<div className="flex opacity-80 mt-[20vh] justify-center">
@@ -633,7 +676,7 @@ function App() {
 									}}
 								>
 									<Card className="relative overflow-hidden bg-black p-0 border-0 box-border group h-full w-full">
-										<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto">
+										<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
 											<span className="ml-1 uppercase tracking-wide">
 												{s.platform}
 											</span>
@@ -721,7 +764,7 @@ function App() {
 									dragId === s.id ? 'opacity-80' : '',
 								].join(' ')}
 							>
-								<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto">
+								<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
 									<span className="ml-1 uppercase tracking-wide">
 										{s.platform}
 									</span>
@@ -789,6 +832,14 @@ function App() {
 					})}
 				</div>
 			</div>
+
+			{/* History Sidebar */}
+			<HistorySidebar
+				isOpen={historyOpen}
+				history={history}
+				onRestore={restoreFromHistory}
+				onDelete={removeFromHistory}
+			/>
 		</>
 	)
 }
