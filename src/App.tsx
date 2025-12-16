@@ -44,6 +44,7 @@ import {
 import { useStreamHistory } from '@/hooks/useStreamHistory'
 import { HistorySidebar } from '@/components/HistorySidebar'
 import { cn } from '@/lib/utils'
+import { calculateOptimalTileSize } from '@/lib/tileSizing'
 
 type Platform = 'twitch' | 'kick'
 
@@ -156,6 +157,7 @@ function App() {
 	const [dragOverId, setDragOverId] = useState<string | null>(null)
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const headerRef = useRef<HTMLElement | null>(null)
+	const prevColsRef = useRef<number>(cols)
 	const [tileSize, setTileSize] = useState<{ w: number; h: number }>({
 		w: 0,
 		h: 0,
@@ -385,16 +387,13 @@ function App() {
 
 	// Compute tile size to fit viewport without scroll
 	useEffect(() => {
-		const GAP = 8 // px, matches gap-2
 		function recalc() {
-			const n = streams.length || 0
-			const c = Math.max(1, cols)
-			const rows = Math.max(1, Math.ceil((n || 1) / c))
-			// Measure container paddings to get true content box
+			// Measure container paddings
 			let cw = window.innerWidth
 			let ch = window.innerHeight
 			let padX = 0
 			let padY = 0
+
 			if (containerRef.current) {
 				const el = containerRef.current
 				const cs = getComputedStyle(el)
@@ -404,39 +403,49 @@ function App() {
 				const pb = Number.parseFloat(cs.paddingBottom) || 0
 				padX = pl + pr
 				padY = pt + pb
-				// clientWidth/Height include paddings; subtract to get content size
 				cw = (el.clientWidth || window.innerWidth) - padX
 				ch = (el.clientHeight || window.innerHeight) - padY
 			}
-			// Header overlays content; do not subtract its height
-			const headerH = 0
-			const mt = 12 // mt-3
-			const availH = Math.max(0, ch - headerH - mt)
-			const colGapTotal = (c - 1) * GAP
-			const rowGapTotal = (rows - 1) * GAP
-			const widthPerCol = Math.floor((cw - colGapTotal) / c)
-			const heightFromWidth = Math.floor((widthPerCol * 9) / 16)
-			const totalHFromWidth = rows * heightFromWidth + rowGapTotal
-			if (totalHFromWidth <= availH) {
-				setTileSize({ w: widthPerCol, h: heightFromWidth })
-			} else {
-				const maxHPerTile = Math.floor((availH - rowGapTotal) / rows)
-				const widthFromHeight = Math.floor((maxHPerTile * 16) / 9)
-				const w = Math.min(widthPerCol, widthFromHeight)
-				const h = Math.floor((w * 9) / 16)
-				setTileSize({ w, h })
+
+			// Detecta mudança de colunas
+			const colsChanged = prevColsRef.current !== cols
+			if (colsChanged) {
+				prevColsRef.current = cols
+			}
+
+			// Calcula novo tamanho usando função pura
+			const newSize = calculateOptimalTileSize({
+				containerWidth: cw,
+				containerHeight: ch,
+				numStreams: streams.length,
+				cols: cols,
+				headerHeight: 0,
+				marginTop: 12,
+				currentSize: colsChanged ? undefined : tileSize,
+				preventShrinkOnRowAdd: true,
+			})
+
+			// Só atualiza se realmente mudou (previne re-renders)
+			if (newSize.w !== tileSize.w || newSize.h !== tileSize.h) {
+				setTileSize(newSize)
 			}
 		}
+
 		recalc()
+
 		const onResize = () => recalc()
 		window.addEventListener('resize', onResize)
+
 		const ro = new ResizeObserver(() => recalc())
 		if (containerRef.current) ro.observe(containerRef.current)
 		if (headerRef.current) ro.observe(headerRef.current)
+
 		return () => {
 			window.removeEventListener('resize', onResize)
 			ro.disconnect()
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		// tileSize é intencionalmente excluído: é o output, não um trigger
 	}, [streams.length, cols, headerOpen, historyOpen])
 
 	// Auto-save customLayout to localStorage
@@ -488,7 +497,7 @@ function App() {
 
 			{headerOpen && (
 				<div className="fixed inset-x-0 top-0 z-20 bg-background border-b border-border">
-					<div className="px-4 sm:px-6 py-3 max-w-[1600px] mx-auto">
+					<div className="px-4 sm:px-6 py-3 mx-auto">
 						<header
 							id="header"
 							ref={headerRef}
@@ -623,7 +632,7 @@ function App() {
 			<div
 				ref={containerRef}
 				className={cn(
-					'px-4 sm:px-6 py-3 max-w-[1600px] mx-auto h-full box-border overflow-hidden bg-zinc-800 transition-all duration-300',
+					'px-4 sm:px-6 py-3 mx-auto h-full box-border overflow-hidden bg-zinc-800 transition-all duration-300',
 					historyOpen && 'sm:mr-[280px]'
 				)}
 			>
