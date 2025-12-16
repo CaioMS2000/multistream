@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react'
+import type { Platform, HistoryItem } from '@/types'
 
 const HISTORY_STORAGE_KEY = 'multistream-history'
 const MAX_HISTORY_ITEMS = 50
-
-export type Platform = 'twitch' | 'kick'
-
-export type HistoryItem = {
-	platform: Platform
-	channel: string
-	removedAt: number
-}
 
 // Carregar histórico do localStorage
 function loadHistory(): HistoryItem[] {

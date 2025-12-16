@@ -7,7 +7,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { HistoryItem, Platform } from '@/hooks/useStreamHistory'
+import type { HistoryItem, Platform } from '@/types'
 import { cn } from '@/lib/utils'
 
 type HistorySidebarProps = {

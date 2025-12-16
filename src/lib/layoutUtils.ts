@@ -1,15 +1,6 @@
-export type Rectangle = {
-	x: number
-	y: number
-	w: number
-	h: number
-}
+import type { Rectangle, CustomLayout } from '@/types'
 
-export type TileCustomization = Rectangle
-
-export type CustomLayout = {
-	[streamId: string]: TileCustomization
-}
+export type { Rectangle, TileCustomization, CustomLayout } from '@/types'
 
 /**
  * Detecta se dois retângulos se sobrepõem

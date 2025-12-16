@@ -1,12 +1,6 @@
-import type { CustomLayout } from '@/lib/layoutUtils'
+import type { CustomLayout, Stream } from '@/types'
 
 const STORAGE_KEY_PREFIX = 'multistream-custom-layout:'
-
-type Stream = {
-	id: string
-	platform: 'twitch' | 'kick'
-	channel: string
-}
 
 /**
  * Gera uma chave baseada na assinatura dos streams (permite múltiplos layouts salvos)
