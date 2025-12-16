@@ -37,85 +37,34 @@ export function calculateOptimalTileSize(params: TileSizeParams): TileSize {
 	const widthPerCol = Math.floor((containerWidth - colGapTotal) / c)
 	const heightFromWidth = Math.floor((widthPerCol * 9) / 16)
 
+	// Otimização: Verifica primeiro se pode manter o tamanho atual
+	// Evita cálculos desnecessários quando o tamanho não precisa mudar
+	if (preventShrinkOnRowAdd && currentSize && currentSize.w > 0) {
+		const totalH = rows * currentSize.h + rowGapTotal
+		const totalW = c * currentSize.w + colGapTotal
+
+		// Se cabe na largura e altura disponíveis
+		if (totalW <= containerWidth && totalH <= availH) {
+			// Verifica se não é menor que o tamanho baseado na largura
+			if (currentSize.w >= widthPerCol) {
+				return currentSize
+			}
+			// Se for menor, pode ser que caiba um tamanho maior - continua calculando
+		}
+	}
+
 	// Calcula tamanho baseado na altura disponível
 	const maxHPerTile = Math.floor((availH - rowGapTotal) / rows)
 	const widthFromHeight = Math.floor((maxHPerTile * 16) / 9)
 
-	console.group('🎯 Tile Sizing Calculation')
-	console.log('🖥️  WINDOW SIZE:', {
-		innerWidth: typeof window !== 'undefined' ? window.innerWidth : 'N/A',
-		innerHeight: typeof window !== 'undefined' ? window.innerHeight : 'N/A',
-	})
-	console.log('📐 Container:', {
-		width: containerWidth,
-		height: containerHeight,
-	})
-	console.log('🎬 Layout:', { streams: numStreams, cols: c, rows })
-	console.log('📏 Available Space:', { availH, colGapTotal, rowGapTotal })
-	console.log('📊 Width-based:', { widthPerCol, heightFromWidth })
-	console.log('📊 Height-based:', { maxHPerTile, widthFromHeight })
-	console.log('📏 Space Usage:', {
-		usedWidth: c * widthPerCol + colGapTotal,
-		containerWidth: containerWidth,
-		wastedWidth: containerWidth - (c * widthPerCol + colGapTotal),
-		usedHeight: rows * heightFromWidth + rowGapTotal,
-		availableHeight: availH,
-		wastedHeight: availH - (rows * heightFromWidth + rowGapTotal),
-	})
-
 	// Escolhe o MAIOR tamanho possível que cabe em ambas as dimensões
-	// Limitado pela largura OU pela altura, o que resultar em tiles maiores
-	let optimalW: number
-	let optimalH: number
-
-	// Verifica se o tamanho baseado na altura cabe na largura total disponível
 	const totalWidthIfUsingHeight = c * widthFromHeight + colGapTotal
 
 	if (totalWidthIfUsingHeight <= containerWidth) {
-		console.log(
-			'✅ Usando tamanho baseado na ALTURA (maximiza espaço vertical)'
-		)
-		console.log(
-			`   → Total width needed: ${totalWidthIfUsingHeight}, available: ${containerWidth}`
-		)
-		optimalW = widthFromHeight
-		optimalH = maxHPerTile
-	} else {
-		console.log('✅ Usando tamanho baseado na LARGURA')
-		console.log(
-			`   → Total width needed: ${totalWidthIfUsingHeight}, available: ${containerWidth}`
-		)
-		optimalW = widthPerCol
-		optimalH = heightFromWidth
+		// Usa tamanho baseado na altura (maximiza espaço vertical)
+		return { w: widthFromHeight, h: maxHPerTile }
 	}
 
-	console.log('🎯 Optimal size:', { w: optimalW, h: optimalH })
-
-	// Otimização: Tenta manter tamanho atual se couber
-	if (preventShrinkOnRowAdd && currentSize && currentSize.w > 0) {
-		const totalH = rows * currentSize.h + rowGapTotal
-		const totalW = c * currentSize.w + colGapTotal
-		const fitsHeight = totalH <= availH
-		const fitsWidth = totalW <= containerWidth
-
-		console.log('🔄 Checking if current size fits:', {
-			current: currentSize,
-			totalH,
-			totalW,
-			fitsHeight,
-			fitsWidth,
-			isLargerThanOptimal: currentSize.w >= optimalW,
-		})
-
-		// Se o tamanho atual cabe e não é menor que o ótimo, mantém
-		if (fitsHeight && fitsWidth && currentSize.w >= optimalW) {
-			console.log('✅ Mantendo tamanho atual (não encolher)')
-			console.groupEnd()
-			return currentSize
-		}
-	}
-
-	console.log('🎯 Retornando novo tamanho:', { w: optimalW, h: optimalH })
-	console.groupEnd()
-	return { w: optimalW, h: optimalH }
+	// Usa tamanho baseado na largura
+	return { w: widthPerCol, h: heightFromWidth }
 }
