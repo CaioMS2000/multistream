@@ -17,12 +17,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { TooltipButton } from '@/components/TooltipButton'
+import { Z_INDEX, TOGGLE_BUTTON_POS } from '@/lib/uiConstants'
+import { cn } from '@/lib/utils'
 import type { Platform } from '@/types'
 
 type HeaderProps = {
@@ -66,7 +63,12 @@ export function Header({
 		<>
 			{/* Toggle button for header collapse/expand */}
 			<Button
-				className="fixed top-2 right-2 z-30"
+				className={cn(
+					'fixed',
+					TOGGLE_BUTTON_POS.HEADER.top,
+					TOGGLE_BUTTON_POS.HEADER.right,
+					`z-${Z_INDEX.TOGGLE_BUTTONS}`
+				)}
 				variant="outline"
 				size="icon"
 				aria-label={headerOpen ? 'Colapsar cabeçalho' : 'Expandir cabeçalho'}
@@ -82,7 +84,12 @@ export function Header({
 
 			{/* Toggle button for history sidebar */}
 			<Button
-				className="fixed top-16 right-2 z-30"
+				className={cn(
+					'fixed',
+					TOGGLE_BUTTON_POS.HISTORY.top,
+					TOGGLE_BUTTON_POS.HISTORY.right,
+					`z-${Z_INDEX.TOGGLE_BUTTONS}`
+				)}
 				variant="outline"
 				size="icon"
 				aria-label={historyOpen ? 'Fechar histórico' : 'Abrir histórico'}
@@ -93,7 +100,12 @@ export function Header({
 			</Button>
 
 			{headerOpen && (
-				<div className="fixed inset-x-0 top-0 z-20 bg-background border-b border-border">
+				<div
+					className={cn(
+						'fixed inset-x-0 top-0 bg-background border-b border-border',
+						`z-${Z_INDEX.HEADER}`
+					)}
+				>
 					<div className="px-4 sm:px-6 py-3 mx-auto">
 						<header
 							id="header"
@@ -166,60 +178,44 @@ export function Header({
 
 								<Separator orientation="vertical" className="h-6 mx-1" />
 
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button
-												variant="outline"
-												size="icon"
-												aria-pressed={muted}
-												aria-label={muted ? 'Desmutar global' : 'Mutar global'}
-												onClick={onMutedToggle}
-											>
-												{muted ? (
-													<VolumeX
-														aria-hidden
-														className="size-4 text-foreground/90"
-													/>
-												) : (
-													<Volume2
-														aria-hidden
-														className="size-4 text-foreground/90"
-													/>
-												)}
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>
-											{muted ? 'Desmutar global' : 'Mutar global'}
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
+								<TooltipButton
+									variant="outline"
+									size="icon"
+									aria-pressed={muted}
+									aria-label={muted ? 'Desmutar global' : 'Mutar global'}
+									onClick={onMutedToggle}
+									tooltip={muted ? 'Desmutar global' : 'Mutar global'}
+								>
+									{muted ? (
+										<VolumeX
+											aria-hidden
+											className="size-4 text-foreground/90"
+										/>
+									) : (
+										<Volume2
+											aria-hidden
+											className="size-4 text-foreground/90"
+										/>
+									)}
+								</TooltipButton>
 
 								<Separator orientation="vertical" className="h-6 mx-1" />
 
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button variant="outline" onClick={onCopyShare}>
-												Copiar link
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>Copiar configuração atual</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
+								<TooltipButton
+									variant="outline"
+									onClick={onCopyShare}
+									tooltip="Copiar configuração atual"
+								>
+									Copiar link
+								</TooltipButton>
 
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button variant="ghost" onClick={onResetLayout}>
-												Resetar layout
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>
-											Voltar ao grid padrão (mantém canais)
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
+								<TooltipButton
+									variant="ghost"
+									onClick={onResetLayout}
+									tooltip="Voltar ao grid padrão (mantém canais)"
+								>
+									Resetar layout
+								</TooltipButton>
 							</div>
 						</header>
 					</div>

@@ -1,16 +1,12 @@
 import { Rnd, type DraggableData } from 'react-rnd'
 import TwitchPlayer from './TwitchPlayer'
 import KickPlayer from './KickPlayer'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { RotateCw } from 'lucide-react'
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { TooltipButton } from '@/components/TooltipButton'
 import { EditableChannelLabel } from './EditableChannelLabel'
+import { Z_INDEX, STREAM_CARD_POS } from '@/lib/uiConstants'
+import { cn } from '@/lib/utils'
 import type { Stream, Rectangle } from '@/types'
 
 type StreamCardProps = {
@@ -63,43 +59,48 @@ export function StreamCard({
 }: StreamCardProps) {
 	const cardContent = (
 		<>
-			<div className="absolute top-1.5 left-2 z-10 flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+			<div
+				className={cn(
+					'absolute flex items-center gap-1 text-xs px-2 py-0 pr-0 rounded-md bg-black/60 text-white pointer-events-auto opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100',
+					STREAM_CARD_POS.LABEL.top,
+					STREAM_CARD_POS.LABEL.left,
+					`z-${Z_INDEX.STREAM_CARD}`
+				)}
+			>
 				<span className="ml-1 uppercase tracking-wide">{stream.platform}</span>
 				<EditableChannelLabel channel={stream.channel} onCommit={onRename} />
 			</div>
 
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button
-							onClick={onReload}
-							variant="outline"
-							size="icon"
-							className="absolute top-1.5 right-10 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
-							aria-label="Recarregar stream"
-						>
-							<RotateCw className="size-4" />
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>Recarregar stream</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
+			<TooltipButton
+				onClick={onReload}
+				variant="outline"
+				size="icon"
+				className={cn(
+					'absolute opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100',
+					STREAM_CARD_POS.RELOAD.top,
+					STREAM_CARD_POS.RELOAD.right,
+					`z-${Z_INDEX.STREAM_CARD}`
+				)}
+				aria-label="Recarregar stream"
+				tooltip="Recarregar stream"
+			>
+				<RotateCw className="size-4" />
+			</TooltipButton>
 
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button
-							onClick={onRemove}
-							variant="destructive"
-							size="icon"
-							className="absolute top-1.5 right-1.5 z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
-						>
-							×
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent>Remover stream</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
+			<TooltipButton
+				onClick={onRemove}
+				variant="destructive"
+				size="icon"
+				className={cn(
+					'absolute opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100',
+					STREAM_CARD_POS.REMOVE.top,
+					STREAM_CARD_POS.REMOVE.right,
+					`z-${Z_INDEX.STREAM_CARD}`
+				)}
+				tooltip="Remover stream"
+			>
+				×
+			</TooltipButton>
 
 			<div
 				className="w-full h-full"

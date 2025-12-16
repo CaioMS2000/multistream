@@ -40,8 +40,6 @@ function App() {
 		initialCols: initial.cols,
 		containerRef,
 		headerRef,
-		headerOpen,
-		historyOpen,
 	})
 
 	// Sync URL with state
