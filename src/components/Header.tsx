@@ -18,7 +18,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select'
 import { TooltipButton } from '@/components/TooltipButton'
-import { Z_INDEX, TOGGLE_BUTTON_POS } from '@/lib/uiConstants'
+import { TOGGLE_BUTTON_POS } from '@/lib/uiConstants'
 import { cn } from '@/lib/utils'
 import type { Platform } from '@/types'
 
@@ -61,26 +61,24 @@ export function Header({
 }: HeaderProps) {
 	return (
 		<>
-			{/* Toggle button for header collapse/expand */}
-			<Button
-				className={cn(
-					'fixed',
-					TOGGLE_BUTTON_POS.HEADER.top,
-					TOGGLE_BUTTON_POS.HEADER.right,
-					`z-${Z_INDEX.TOGGLE_BUTTONS}`
-				)}
-				variant="outline"
-				size="icon"
-				aria-label={headerOpen ? 'Colapsar cabeçalho' : 'Expandir cabeçalho'}
-				aria-pressed={headerOpen}
-				onClick={onHeaderToggle}
-			>
-				{headerOpen ? (
-					<ChevronUp aria-hidden className="size-4" />
-				) : (
+			{/* Toggle button for header - only visible when header is collapsed */}
+			{!headerOpen && (
+				<Button
+					className={cn(
+						'fixed',
+						TOGGLE_BUTTON_POS.HEADER.top,
+						TOGGLE_BUTTON_POS.HEADER.right,
+						'z-30'
+					)}
+					variant="outline"
+					size="icon"
+					aria-label="Expandir cabeçalho"
+					aria-pressed={false}
+					onClick={onHeaderToggle}
+				>
 					<ChevronDown aria-hidden className="size-4" />
-				)}
-			</Button>
+				</Button>
+			)}
 
 			{/* Toggle button for history sidebar */}
 			<Button
@@ -88,7 +86,7 @@ export function Header({
 					'fixed',
 					TOGGLE_BUTTON_POS.HISTORY.top,
 					TOGGLE_BUTTON_POS.HISTORY.right,
-					`z-${Z_INDEX.TOGGLE_BUTTONS}`
+					'z-30'
 				)}
 				variant="outline"
 				size="icon"
@@ -99,18 +97,32 @@ export function Header({
 				<History aria-hidden className="size-4" />
 			</Button>
 
+			{/* Collapse button - rendered outside header container when open */}
+			{headerOpen && (
+				<Button
+					className="fixed top-3 right-4 z-30"
+					variant="outline"
+					size="icon"
+					aria-label="Colapsar cabeçalho"
+					aria-pressed={true}
+					onClick={onHeaderToggle}
+				>
+					<ChevronUp aria-hidden className="size-4" />
+				</Button>
+			)}
+
 			{headerOpen && (
 				<div
 					className={cn(
 						'fixed inset-x-0 top-0 bg-background border-b border-border',
-						`z-${Z_INDEX.HEADER}`
+						'z-20'
 					)}
 				>
 					<div className="px-4 sm:px-6 py-3 mx-auto">
 						<header
 							id="header"
 							ref={headerRef}
-							className="flex items-center gap-3 flex-wrap"
+							className="flex items-center gap-3 flex-wrap pr-12"
 						>
 							<h1 className="text-xl font-semibold tracking-tight mr-2">
 								MultiStream

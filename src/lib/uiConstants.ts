@@ -16,13 +16,13 @@ export const Z_INDEX = {
 export const TOGGLE_BUTTON_POS = {
 	/** Posição do botão de toggle do header */
 	HEADER: {
-		top: 'top-2',
-		right: 'right-2',
+		top: 'top-3',
+		right: 'right-4',
 	},
 	/** Posição do botão de toggle do histórico */
 	HISTORY: {
 		top: 'top-16',
-		right: 'right-2',
+		right: 'right-4',
 	},
 } as const
 

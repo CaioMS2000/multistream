@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/tooltip'
 import type { HistoryItem, Platform } from '@/types'
 import { cn } from '@/lib/utils'
-import { Z_INDEX } from '@/lib/uiConstants'
 
 type HistorySidebarProps = {
 	isOpen: boolean
@@ -28,7 +27,7 @@ export function HistorySidebar({
 		<div
 			className={cn(
 				'fixed right-0 top-0 h-full w-full sm:w-[280px] bg-card border-l border-border transition-transform duration-300 ease-in-out',
-				`z-${Z_INDEX.HEADER}`,
+				'z-20',
 				isOpen ? 'translate-x-0' : 'translate-x-full'
 			)}
 			role="complementary"
