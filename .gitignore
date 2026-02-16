@@ -27,3 +27,5 @@ dist-ssr
 temp/
 *.md
 !README.md
+!RENDER-PLAYERS.md
+!GRID_LAYOUT_ALGORITHM.md
