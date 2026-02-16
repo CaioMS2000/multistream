@@ -1,0 +1,9 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "extends": [
+    "@caioms/biomejs-config/biome"
+  ],
+  "files": {
+    "ignore": ["src/index.css"]
+  }
+}

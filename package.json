@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "biome check .",
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -22,6 +24,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@caioms/pre-git-auto-format": "latest",
     "@tanstack/router-plugin": "^1.160.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
