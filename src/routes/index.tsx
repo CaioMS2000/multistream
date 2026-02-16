@@ -1,21 +1,39 @@
 import { PlayerContainer } from '@/components/player-container'
 import { useGridLayout } from '@/hooks/use-grid-layout'
-import { useWindowSize } from '@/hooks/use-window-size'
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/')({
 	component: Index,
 })
 
 function Index() {
-	const { width: screenWidth, height: screenHeight } = useWindowSize()
-	const playersCount = 4
-	const { cols, rows, playerWidth, playerHeight } = useGridLayout(playersCount)
+	const colsCount = 2
+	const { cols, totalSlots, playerWidth, playerHeight } =
+		useGridLayout(colsCount)
+
+	const [slots] = useState(() =>
+		Array.from({ length: totalSlots }, () => crypto.randomUUID())
+	)
+
 	return (
-		<>
-			<div className="max-w-screen max-h-screen w-screen h-screen">
-				<PlayerContainer />
-			</div>
-		</>
+		<div
+			className="h-screen w-screen"
+			style={{
+				display: 'grid',
+				gridTemplateColumns: `repeat(${cols}, ${playerWidth}px)`,
+				justifyContent: 'center',
+				alignContent: 'center',
+			}}
+		>
+			{slots.map(id => (
+				<PlayerContainer
+					key={id}
+					id={id}
+					width={playerWidth}
+					height={playerHeight}
+				/>
+			))}
+		</div>
 	)
 }
