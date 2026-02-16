@@ -1,7 +1,7 @@
 import { PlayerContainer } from '@/components/player-container'
 import { useGridLayout } from '@/hooks/use-grid-layout'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 export const Route = createFileRoute('/')({
 	component: Index,
@@ -12,9 +12,20 @@ function Index() {
 	const { cols, totalSlots, playerWidth, playerHeight } =
 		useGridLayout(colsCount)
 
-	const [slots] = useState(() =>
+	const [slots, setSlots] = useState<(string | null)[]>(() =>
 		Array.from({ length: totalSlots }, () => crypto.randomUUID())
 	)
+
+	const handleSwap = useCallback((fromIndex: number, toIndex: number) => {
+		if (fromIndex === toIndex) return
+		setSlots(prev => {
+			const next = [...prev]
+			const temp = next[fromIndex]
+			next[fromIndex] = next[toIndex]
+			next[toIndex] = temp
+			return next
+		})
+	}, [])
 
 	return (
 		<div
@@ -26,12 +37,14 @@ function Index() {
 				alignContent: 'center',
 			}}
 		>
-			{slots.map(id => (
+			{slots.map((playerId, index) => (
 				<PlayerContainer
-					key={id}
-					id={id}
+					key={`slot-${index}`}
+					playerId={playerId}
+					slotIndex={index}
 					width={playerWidth}
 					height={playerHeight}
+					onSwap={handleSwap}
 				/>
 			))}
 		</div>
