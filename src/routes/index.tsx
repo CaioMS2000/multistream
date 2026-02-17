@@ -1,11 +1,11 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 import { Layout } from '@/components/layout'
 import { Slot } from '@/components/slot'
 import { TopBar } from '@/components/top-bar'
 import { useGridLayout } from '@/hooks/use-grid-layout'
 import { useSyncStreamsUrl } from '@/hooks/use-sync-streams-url'
 import { useStreamsStore } from '@/store/streams'
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
 
 const searchSchema = z.object({
 	cols: z.number().min(1).default(2),
@@ -20,32 +20,38 @@ export const Route = createFileRoute('/')({
 
 function Index() {
 	const { cols: colsCount } = Route.useSearch()
-	const { totalSlots, playerWidth, playerHeight } = useGridLayout(colsCount)
 	const streams = useStreamsStore(state => state.streams)
 	const order = useStreamsStore(state => state.order)
+	const { totalSlots, playerWidth, playerHeight } = useGridLayout(
+		colsCount,
+		streams.length
+	)
 
 	useSyncStreamsUrl(totalSlots)
 
 	return (
-		<Layout>
+		<>
 			<TopBar />
-			{order.map((streamIndex, slotIndex) => {
-				const stream = streamIndex >= 0 ? (streams[streamIndex] ?? null) : null
-				const key = stream
-					? `${stream.platform}:${stream.username}`
-					: `empty-${slotIndex}`
+			<Layout>
+				{order.map((streamIndex, slotIndex) => {
+					const stream =
+						streamIndex >= 0 ? (streams[streamIndex] ?? null) : null
+					const key = stream
+						? `${stream.platform}:${stream.username}`
+						: `empty-${slotIndex}`
 
-				return (
-					<Slot
-						key={key}
-						stream={stream}
-						streamIndex={streamIndex}
-						slotIndex={slotIndex}
-						width={playerWidth}
-						height={playerHeight}
-					/>
-				)
-			})}
-		</Layout>
+					return (
+						<Slot
+							key={key}
+							stream={stream}
+							streamIndex={streamIndex}
+							slotIndex={slotIndex}
+							width={playerWidth}
+							height={playerHeight}
+						/>
+					)
+				})}
+			</Layout>
+		</>
 	)
 }

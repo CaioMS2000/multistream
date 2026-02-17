@@ -3,7 +3,7 @@ import { useWindowSize } from './use-window-size'
 
 const ASPECT_RATIO = 1.777777777777778 as const // 16 / 9
 
-export function useGridLayout(cols: number) {
+export function useGridLayout(cols: number, streamCount = 0) {
 	const { width, height } = useWindowSize()
 
 	return useMemo(() => {
@@ -18,10 +18,12 @@ export function useGridLayout(cols: number) {
 		}
 
 		const playerWidth = Math.floor(width / cols)
-		const playerHeight = Math.floor(playerWidth / ASPECT_RATIO)
-		const rows = Math.floor(height / playerHeight)
+		const naturalPlayerHeight = Math.floor(playerWidth / ASPECT_RATIO)
+		const naturalRows = Math.floor(height / naturalPlayerHeight)
+		const rows = Math.max(naturalRows, Math.ceil(streamCount / cols), 1)
+		const playerHeight = Math.floor(height / rows)
 		const totalSlots = cols * rows
 
 		return { cols, rows, totalSlots, playerWidth, playerHeight }
-	}, [cols, width, height])
+	}, [cols, streamCount, width, height])
 }
