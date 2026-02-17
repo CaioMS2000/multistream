@@ -77,7 +77,11 @@ export function TopBar() {
 	}
 
 	return (
-		<Collapsible open={open} onOpenChange={setOpen} className="absolute w-full">
+		<Collapsible
+			open={open}
+			onOpenChange={setOpen}
+			className="absolute w-full z-10"
+		>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="relative flex flex-col p-2">
 					<div className="flex justify-end">
