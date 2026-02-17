@@ -64,7 +64,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 	}
 	return (
 		<div className="relative bg-yellow-200 w-full h-full">
-			<div className="absolute w-full flex justify-end gap-2">
+			<div className="absolute w-full flex justify-end gap-2 pt-1 pr-1">
 				<Button type="button" onClick={onClickClose}>
 					<X />
 				</Button>
