@@ -27,7 +27,10 @@ export const useStreamsStore = create<StreamsStore>()(
 			initFromUrl: (streams, totalSlots) =>
 				set({
 					streams,
-					order: Array.from({ length: totalSlots }, (_, i) => i),
+					order: Array.from(
+						{ length: Math.max(totalSlots, streams.length) },
+						(_, i) => i
+					),
 					reloadKeys: Array.from({ length: streams.length }, () => 0),
 				}),
 
@@ -37,7 +40,7 @@ export const useStreamsStore = create<StreamsStore>()(
 					if (totalSlots > state.order.length) {
 						const extra = Array.from(
 							{ length: totalSlots - state.order.length },
-							(_, i) => state.streams.length + i
+							(_, i) => state.order.length + i
 						)
 						return { order: [...state.order, ...extra] }
 					}
