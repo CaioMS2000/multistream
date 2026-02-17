@@ -30,12 +30,12 @@ export function SideBar() {
 		<Collapsible
 			open={open}
 			onOpenChange={setOpen}
-			className="absolute top-1/2 -translate-y-1/2 right-0 z-10 h-10/12 pr-1 bg-blue-300"
+			className="absolute top-1/2 -translate-y-1/2 right-0 z-10 h-10/12 pr-1"
 		>
 			<CollapsibleTrigger>
 				<Button>{open ? <ChevronRight /> : <ChevronLeft />}</Button>
 			</CollapsibleTrigger>
-			<CollapsibleContent className="bg-red-500 rounded-l-lg p-4 overflow-y-auto">
+			<CollapsibleContent className="bg-card text-card-foreground border border-r-0 border-border rounded-l-lg p-4 overflow-y-auto">
 				{!historyEmpty &&
 					history.map((stream, index) => {
 						const key = index
