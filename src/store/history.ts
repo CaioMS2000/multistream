@@ -1,6 +1,6 @@
-import type { Stream } from '@/@types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Stream } from '@/@types'
 
 interface HistoryStore {
 	history: Stream[]
@@ -17,8 +17,7 @@ export const useHistoryStore = create<HistoryStore>()(
 			addToHistory: stream =>
 				set(state => {
 					const alreadyIn = state.history.some(
-						h =>
-							h.platform === stream.platform && h.username === stream.username
+						h => h.platform === stream.platform && h.channel === stream.channel
 					)
 					return alreadyIn ? state : { history: [...state.history, stream] }
 				}),
@@ -27,9 +26,7 @@ export const useHistoryStore = create<HistoryStore>()(
 				set(state => ({
 					history: state.history.filter(
 						h =>
-							!(
-								h.platform === stream.platform && h.username === stream.username
-							)
+							!(h.platform === stream.platform && h.channel === stream.channel)
 					),
 				})),
 

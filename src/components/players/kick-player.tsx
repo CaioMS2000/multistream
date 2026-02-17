@@ -1,12 +1,12 @@
 export type KickPlayerProps = {
-	username: string
+	channel: string
 }
 
-export function KickPlayer({ username }: KickPlayerProps) {
+export function KickPlayer({ channel }: KickPlayerProps) {
 	return (
 		<>
 			<div className="bg-green-500 w-full h-full">
-				<span className="text-white">{username}</span>
+				<span className="text-white">{channel}</span>
 			</div>
 		</>
 	)

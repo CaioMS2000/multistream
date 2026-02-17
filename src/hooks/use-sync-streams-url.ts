@@ -1,7 +1,7 @@
-import { parseStreams } from '@/utils/parse-stream'
-import { useStreamsStore } from '@/store/streams'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
+import { useStreamsStore } from '@/store/streams'
+import { parseStreams } from '@/utils/parse-stream'
 
 const routeApi = getRouteApi('/')
 
@@ -33,7 +33,7 @@ export function useSyncStreamsUrl(totalSlots: number) {
 		// Avoid clearing URL before init completes
 		if (streams.length === 0 && streamsRaw) return
 		const streamsParam = streams
-			.map(s => `${s.platform}:${s.username}`)
+			.map(s => `${s.platform}:${s.channel}`)
 			.join(',')
 		if (streamsParam === streamsRaw) return
 		navigate({ to: '/', search: { cols, muted, streams: streamsParam } })

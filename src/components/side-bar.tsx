@@ -49,7 +49,7 @@ export function SideBar() {
 										<Trash />
 									</Button>
 								</div>
-								<p>{stream.username}</p>
+								<p>{stream.channel}</p>
 							</div>
 						)
 					})}

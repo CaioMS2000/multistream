@@ -1,13 +1,13 @@
+import { RotateCcw, X } from 'lucide-react'
+import { type JSX, memo, useEffect } from 'react'
+import { toast } from 'sonner'
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
 import { useHistoryStore } from '@/store/history'
 import { useStreamsStore } from '@/store/streams'
-import { memo, useEffect, type JSX } from 'react'
-import { toast } from 'sonner'
-import { Button } from './ui/button'
-import { RotateCcw, X } from 'lucide-react'
-import { TwitchPlayer } from './players/twitch-player'
 import { KickPlayer } from './players/kick-player'
+import { TwitchPlayer } from './players/twitch-player'
+import { Button } from './ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
 
 type PlayerContainerProps = {
@@ -43,13 +43,11 @@ export const PlayerContainer = memo(function PlayerContainer({
 	switch (stream.platform) {
 		case 'twitch':
 			PlayerComponent = (
-				<TwitchPlayer key={reloadKey} username={stream.username} />
+				<TwitchPlayer key={reloadKey} channel={stream.channel} />
 			)
 			break
 		case 'kick':
-			PlayerComponent = (
-				<KickPlayer key={reloadKey} username={stream.username} />
-			)
+			PlayerComponent = <KickPlayer key={reloadKey} channel={stream.channel} />
 			break
 		default: {
 			const _exhaustive: never = stream.platform

@@ -41,7 +41,7 @@ function Index() {
 					const stream =
 						streamIndex >= 0 ? (streams[streamIndex] ?? null) : null
 					const key = stream
-						? `${stream.platform}:${stream.username}`
+						? `${stream.platform}:${stream.channel}`
 						: `empty-${slotIndex}`
 
 					return (

@@ -1,12 +1,12 @@
 export type TwitchPlayerProps = {
-	username: string
+	channel: string
 }
 
-export function TwitchPlayer({ username }: TwitchPlayerProps) {
+export function TwitchPlayer({ channel }: TwitchPlayerProps) {
 	return (
 		<>
 			<div className="bg-purple-500 w-full h-full">
-				<span className="text-white">{username}</span>
+				<span className="text-white">{channel}</span>
 			</div>
 		</>
 	)
