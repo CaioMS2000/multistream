@@ -1,5 +1,6 @@
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
+import { useHistoryStore } from '@/store/history'
 import { useStreamsStore } from '@/store/streams'
 import { memo, useEffect, type JSX } from 'react'
 import { toast } from 'sonner'
@@ -21,8 +22,10 @@ export const PlayerContainer = memo(function PlayerContainer({
 	const removeStream = useStreamsStore(state => state.removeStream)
 	const reloadStream = useStreamsStore(state => state.reloadStream)
 	const reloadKey = useStreamsStore(state => state.reloadKeys[streamIndex] ?? 0)
+	const addToHistory = useHistoryStore(state => state.addToHistory)
 
 	function onClickClose() {
+		addToHistory(stream)
 		removeStream(streamIndex)
 	}
 
