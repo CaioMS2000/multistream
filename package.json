@@ -11,6 +11,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-router": "^1.160.0",
     "@tanstack/react-router-devtools": "^1.160.0",
@@ -20,8 +21,10 @@
     "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-hook-form": "^7.71.1",
     "tailwind-merge": "^3.4.1",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@caioms/pre-git-auto-format": "latest",
