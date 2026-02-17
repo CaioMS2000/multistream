@@ -26,6 +26,8 @@ dist-ssr
 # others
 temp/
 *.md
+*.sh
+*.txt
 !README.md
 !RENDER-PLAYERS.md
 !GRID_LAYOUT_ALGORITHM.md
