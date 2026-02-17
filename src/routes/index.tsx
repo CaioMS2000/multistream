@@ -7,6 +7,7 @@ import { TopBar } from '@/components/top-bar'
 import { useGridLayout } from '@/hooks/use-grid-layout'
 import { useSyncStreamsUrl } from '@/hooks/use-sync-streams-url'
 import { useStreamsStore } from '@/store/streams'
+import { SideBar } from '@/components/side-bar'
 
 const searchSchema = z.object({
 	cols: z.number().min(1).default(2),
@@ -34,6 +35,7 @@ function Index() {
 	return (
 		<>
 			<TopBar />
+			<SideBar />
 			<Layout cols={colsCount} playerWidth={playerWidth}>
 				{order.map((streamIndex, slotIndex) => {
 					const stream =
