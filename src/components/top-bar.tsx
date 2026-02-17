@@ -21,9 +21,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './ui/select'
+import { Separator } from './ui/separator'
 
 const formSchema = z.object({
-	username: z.string(),
+	channel: z.string(),
 	platform: z.string(),
 	cols: z.number().min(1),
 	muted: z.boolean(),
@@ -39,7 +40,7 @@ export function TopBar() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			username: '',
+			channel: '',
 			platform: '',
 			cols: search.cols,
 			muted: search.muted,
@@ -59,16 +60,15 @@ export function TopBar() {
 
 	function onSubmit(data: z.infer<typeof formSchema>) {
 		const hasPlatform = STREAM_OPTION.includes(data.platform as STREAM_OPTION)
-		const hasUsername = data.username.trim().length > 0
+		const hasChannel = data.channel.trim().length > 0
 
-		if (hasPlatform && hasUsername) {
+		if (hasPlatform && hasChannel) {
 			addStream({
 				platform: data.platform as STREAM_OPTION,
-				username: data.username.trim(),
+				channel: data.channel.trim(),
 			})
 			form.reset({
-				username: '',
-				platform: '',
+				channel: '',
 				cols: data.cols,
 				muted: data.muted,
 			})
@@ -84,60 +84,63 @@ export function TopBar() {
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="relative flex flex-col p-2">
 					<div className="flex justify-end">
-						<CollapsibleTrigger asChild className="absolute">
+						<CollapsibleTrigger asChild className="absolute z-20">
 							<Button>{open ? <ChevronUp /> : <ChevronDown />}</Button>
 						</CollapsibleTrigger>
 					</div>
-					<CollapsibleContent className="flex gap-2">
-						<Controller
-							control={form.control}
-							name="platform"
-							render={({ field }) => (
-								<Select onValueChange={field.onChange} value={field.value}>
-									<SelectTrigger className="w-45">
-										<SelectValue placeholder="Platform" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											{STREAM_OPTION.map(option => (
-												<SelectItem key={option} value={option}>
-													{option}
-												</SelectItem>
-											))}
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							)}
-						/>
-						<Controller
-							control={form.control}
-							name="username"
-							render={({ field }) => (
-								<Input placeholder="Username" className="w-64" {...field} />
-							)}
-						/>
-						<Controller
-							control={form.control}
-							name="cols"
-							render={({ field }) => (
-								<Input
-									type="number"
-									placeholder="Columns"
-									className="w-24"
-									{...field}
-									onChange={e => field.onChange(Number(e.target.value))}
-								/>
-							)}
-						/>
-						<label className="flex items-center cursor-pointer">
-							<input
-								type="checkbox"
-								className="sr-only"
-								{...form.register('muted')}
+					<CollapsibleContent>
+						<div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border rounded-lg px-3 py-2">
+							<Controller
+								control={form.control}
+								name="platform"
+								render={({ field }) => (
+									<Select onValueChange={field.onChange} value={field.value}>
+										<SelectTrigger className="w-45">
+											<SelectValue placeholder="Platform" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectGroup>
+												{STREAM_OPTION.map(option => (
+													<SelectItem key={option} value={option}>
+														{option}
+													</SelectItem>
+												))}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+								)}
 							/>
-							{muted ? <VolumeX /> : <Volume2 />}
-						</label>
-						<Button type="submit">Adicionar</Button>
+							<Controller
+								control={form.control}
+								name="channel"
+								render={({ field }) => (
+									<Input placeholder="Channel" className="w-64" {...field} />
+								)}
+							/>
+							<Button type="submit">Adicionar</Button>
+							<Separator orientation="vertical" className="h-5 mx-1" />
+							<Controller
+								control={form.control}
+								name="cols"
+								render={({ field }) => (
+									<Input
+										type="number"
+										placeholder="Columns"
+										className="w-24"
+										{...field}
+										onChange={e => field.onChange(Number(e.target.value))}
+									/>
+								)}
+							/>
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								onClick={() => form.setValue('muted', !muted)}
+							>
+								{muted ? <VolumeX /> : <Volume2 />}
+							</Button>
+						</div>
 					</CollapsibleContent>
 				</div>
 			</form>
