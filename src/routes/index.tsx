@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
+import { UI_INSETS } from '@/config/ui-insets'
 import { Layout } from '@/components/layout'
 import { Slot } from '@/components/slot'
 import { TopBar } from '@/components/top-bar'
@@ -24,7 +25,8 @@ function Index() {
 	const order = useStreamsStore(state => state.order)
 	const { totalSlots, playerWidth, playerHeight } = useGridLayout(
 		colsCount,
-		streams.length
+		streams.length,
+		UI_INSETS
 	)
 
 	useSyncStreamsUrl(totalSlots)
@@ -32,7 +34,7 @@ function Index() {
 	return (
 		<>
 			<TopBar />
-			<Layout>
+			<Layout cols={colsCount} playerWidth={playerWidth}>
 				{order.map((streamIndex, slotIndex) => {
 					const stream =
 						streamIndex >= 0 ? (streams[streamIndex] ?? null) : null
