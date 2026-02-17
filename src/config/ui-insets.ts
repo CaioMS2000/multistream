@@ -1,4 +1,4 @@
 export const UI_INSETS = {
-	top: 50,
+	top: 20,
 	right: 50,
 } as const
