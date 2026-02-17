@@ -1,26 +1,17 @@
 import { Layout } from '@/components/layout'
-import { PlayerContainer } from '@/components/player-container'
+import { Slot } from '@/components/slot'
 import { TopBar } from '@/components/top-bar'
 import { useGridLayout } from '@/hooks/use-grid-layout'
+import { parseStreams } from '@/utils/parse-stream'
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
 import { z } from 'zod'
-import type { Stream } from '@/@types'
-import { STREAM_OPTION } from '@/@types'
 
 const searchSchema = z.object({
 	cols: z.number().min(1).default(2),
 	muted: z.boolean().default(true),
 	streams: z.string().default(''),
 })
-
-export function parseStreams(raw: string): Stream[] {
-	if (raw === '') return []
-	return raw.split(',').map(s => {
-		const [platform, username] = s.split(':')
-		return { platform: platform as (typeof STREAM_OPTION)[number], username }
-	})
-}
 
 export const Route = createFileRoute('/')({
 	component: Index,
@@ -57,9 +48,9 @@ function Index() {
 					: `empty-${slotIndex}`
 
 				return (
-					<PlayerContainer
+					<Slot
 						key={key}
-						playerId={stream ? `${stream.platform}:${stream.username}` : null}
+						stream={stream}
 						slotIndex={slotIndex}
 						width={playerWidth}
 						height={playerHeight}
