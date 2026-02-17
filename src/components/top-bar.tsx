@@ -1,14 +1,11 @@
 import { STREAM_OPTION } from '@/@types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Volume2, VolumeX } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
 import { useStreamsStore } from '@/store/streams'
-
-const routeApi = getRouteApi('/')
-
 import { Button } from './ui/button'
 import {
 	Collapsible,
@@ -32,8 +29,10 @@ const formSchema = z.object({
 	muted: z.boolean(),
 })
 
+const routeApi = getRouteApi('/')
+
 export function TopBar() {
-	const [open, setOpen] = useState(false)
+	const [open, setOpen] = useState(true)
 	const search = routeApi.useSearch()
 	const navigate = useNavigate()
 	const addStream = useStreamsStore(state => state.addStream)
@@ -130,9 +129,13 @@ export function TopBar() {
 								/>
 							)}
 						/>
-						<label className="flex items-center gap-1 text-sm text-white">
-							<input type="checkbox" {...form.register('muted')} />
-							Muted
+						<label className="flex items-center cursor-pointer">
+							<input
+								type="checkbox"
+								className="sr-only"
+								{...form.register('muted')}
+							/>
+							{muted ? <VolumeX /> : <Volume2 />}
 						</label>
 						<Button type="submit">Adicionar</Button>
 					</CollapsibleContent>
