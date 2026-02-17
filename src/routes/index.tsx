@@ -2,9 +2,9 @@ import { Layout } from '@/components/layout'
 import { Slot } from '@/components/slot'
 import { TopBar } from '@/components/top-bar'
 import { useGridLayout } from '@/hooks/use-grid-layout'
-import { parseStreams } from '@/utils/parse-stream'
+import { useSyncStreamsUrl } from '@/hooks/use-sync-streams-url'
+import { useStreamsStore } from '@/store/streams'
 import { createFileRoute } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
 import { z } from 'zod'
 
 const searchSchema = z.object({
@@ -19,30 +19,18 @@ export const Route = createFileRoute('/')({
 })
 
 function Index() {
-	const { cols: colsCount, streams: streamsRaw } = Route.useSearch()
-	const streams = parseStreams(streamsRaw)
+	const { cols: colsCount } = Route.useSearch()
 	const { totalSlots, playerWidth, playerHeight } = useGridLayout(colsCount)
+	const streams = useStreamsStore(state => state.streams)
+	const order = useStreamsStore(state => state.order)
 
-	const [order, setOrder] = useState<number[]>(() =>
-		Array.from({ length: totalSlots }, (_, i) => i)
-	)
-
-	const handleSwap = useCallback((fromIndex: number, toIndex: number) => {
-		if (fromIndex === toIndex) return
-		setOrder(prev => {
-			const next = [...prev]
-			const temp = next[fromIndex]
-			next[fromIndex] = next[toIndex]
-			next[toIndex] = temp
-			return next
-		})
-	}, [])
+	useSyncStreamsUrl(totalSlots)
 
 	return (
 		<Layout>
 			<TopBar />
 			{order.map((streamIndex, slotIndex) => {
-				const stream = streams[streamIndex] ?? null
+				const stream = streamIndex >= 0 ? (streams[streamIndex] ?? null) : null
 				const key = stream
 					? `${stream.platform}:${stream.username}`
 					: `empty-${slotIndex}`
@@ -51,10 +39,10 @@ function Index() {
 					<Slot
 						key={key}
 						stream={stream}
+						streamIndex={streamIndex}
 						slotIndex={slotIndex}
 						width={playerWidth}
 						height={playerHeight}
-						onSwap={handleSwap}
 					/>
 				)
 			})}

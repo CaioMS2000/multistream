@@ -1,31 +1,42 @@
 import type { Stream } from '@/@types'
-import { memo, useState } from 'react'
+import { useStreamsStore } from '@/store/streams'
+import { memo, useState, type JSX } from 'react'
 import { PlayerContainer } from './player-container'
 
 type SlotProps = {
 	stream: Stream | null
+	streamIndex: number
 	slotIndex: number
 	width: number
 	height: number
-	onSwap: (fromIndex: number, toIndex: number) => void
 }
 
 export const Slot = memo(function Slot({
 	stream,
+	streamIndex,
 	slotIndex,
 	width,
 	height,
-	onSwap,
 }: SlotProps) {
+	const swapSlots = useStreamsStore(state => state.swapSlots)
 	const [isDragOver, setIsDragOver] = useState(false)
 	const hasContent = stream !== null
+	let ChildComponent: JSX.Element = (
+		<span className="text-gray-700 text-xs">vazio</span>
+	)
+
+	if (hasContent) {
+		ChildComponent = (
+			<PlayerContainer stream={stream} streamIndex={streamIndex} />
+		)
+	}
 
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: drag-and-drop container, not a semantic list
 		<div
 			role="listitem"
 			style={{ width, height }}
-			className={`border rounded-lg flex items-center justify-center transition-colors ${
+			className={`overflow-hidden border rounded-lg flex items-center justify-center transition-colors ${
 				isDragOver
 					? 'border-blue-500 bg-blue-500/10'
 					: hasContent
@@ -47,14 +58,10 @@ export const Slot = memo(function Slot({
 				e.preventDefault()
 				setIsDragOver(false)
 				const fromIndex = Number(e.dataTransfer.getData('text/plain'))
-				onSwap(fromIndex, slotIndex)
+				swapSlots(fromIndex, slotIndex)
 			}}
 		>
-			{stream ? (
-				<PlayerContainer stream={stream} />
-			) : (
-				<span className="text-gray-700 text-xs">vazio</span>
-			)}
+			{ChildComponent}
 		</div>
 	)
 })

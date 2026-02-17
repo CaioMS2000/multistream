@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
+import { useStreamsStore } from '@/store/streams'
 
 const routeApi = getRouteApi('/')
 
@@ -35,11 +36,12 @@ export function TopBar() {
 	const [open, setOpen] = useState(false)
 	const search = routeApi.useSearch()
 	const navigate = useNavigate()
+	const addStream = useStreamsStore(state => state.addStream)
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			username: '',
-			platform: undefined,
+			platform: '',
 			cols: search.cols,
 			muted: search.muted,
 		},
@@ -61,17 +63,9 @@ export function TopBar() {
 		const hasUsername = data.username.trim().length > 0
 
 		if (hasPlatform && hasUsername) {
-			const newStream = `${data.platform}:${data.username.trim()}`
-			const streams = search.streams
-				? `${search.streams},${newStream}`
-				: newStream
-			navigate({
-				to: '/',
-				search: {
-					cols: data.cols,
-					muted: data.muted,
-					streams,
-				},
+			addStream({
+				platform: data.platform as STREAM_OPTION,
+				username: data.username.trim(),
 			})
 			form.reset({
 				username: '',
@@ -96,10 +90,7 @@ export function TopBar() {
 							control={form.control}
 							name="platform"
 							render={({ field }) => (
-								<Select
-									onValueChange={field.onChange}
-									value={field.value || undefined}
-								>
+								<Select onValueChange={field.onChange} value={field.value}>
 									<SelectTrigger className="w-45">
 										<SelectValue placeholder="Platform" />
 									</SelectTrigger>
