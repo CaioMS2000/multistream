@@ -1,5 +1,5 @@
 import { RotateCcw, X } from 'lucide-react'
-import { type JSX, memo, useEffect } from 'react'
+import { type JSX, memo, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
@@ -9,6 +9,15 @@ import { KickPlayer } from './players/kick-player'
 import { TwitchPlayer } from './players/twitch-player'
 import { Button } from './ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Input } from './ui/input'
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from './ui/select'
 
 type PlayerContainerProps = {
 	stream: Stream
@@ -21,8 +30,17 @@ export const PlayerContainer = memo(function PlayerContainer({
 }: PlayerContainerProps) {
 	const removeStream = useStreamsStore(state => state.removeStream)
 	const reloadStream = useStreamsStore(state => state.reloadStream)
+	const updateStream = useStreamsStore(state => state.updateStream)
 	const reloadKey = useStreamsStore(state => state.reloadKeys[streamIndex] ?? 0)
 	const addToHistory = useHistoryStore(state => state.addToHistory)
+
+	const [channel, setChannel] = useState(stream.channel)
+	const [platform, setPlatform] = useState(stream.platform)
+
+	useEffect(() => {
+		setChannel(stream.channel)
+		setPlatform(stream.platform)
+	}, [stream.channel, stream.platform])
 
 	function onClickClose() {
 		addToHistory(stream)
@@ -30,6 +48,20 @@ export const PlayerContainer = memo(function PlayerContainer({
 	}
 
 	function onClickReload() {
+		reloadStream(streamIndex)
+	}
+
+	function onChannelBlur() {
+		const trimmed = channel.trim()
+		if (trimmed && trimmed !== stream.channel) {
+			updateStream(streamIndex, { channel: trimmed })
+			reloadStream(streamIndex)
+		}
+	}
+
+	function onPlatformChange(value: string) {
+		setPlatform(value as STREAM_OPTION)
+		updateStream(streamIndex, { platform: value as STREAM_OPTION })
 		reloadStream(streamIndex)
 	}
 
@@ -63,15 +95,49 @@ export const PlayerContainer = memo(function PlayerContainer({
 			)
 		}
 	}
+
 	return (
-		<div className="relative bg-yellow-200 w-full h-full">
-			<div className="absolute w-full flex justify-end gap-2 pt-1 pr-1">
-				<Button type="button" onClick={onClickClose}>
-					<X />
-				</Button>
-				<Button type="button" onClick={onClickReload}>
-					<RotateCcw />
-				</Button>
+		<div className="relative w-full h-full group">
+			<div className="flex absolute justify-between w-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+				<div className="flex gap-1 items-center">
+					<Select value={platform} onValueChange={onPlatformChange}>
+						<SelectTrigger className="bg-card dark:bg-card dark:hover:bg-card">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent className="bg-card dark:bg-card">
+							<SelectGroup>
+								{STREAM_OPTION.map(option => (
+									<SelectItem key={option} value={option}>
+										{option}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+					<Input
+						type="text"
+						className="field-sizing-content bg-card dark:bg-card"
+						value={channel}
+						onChange={e => setChannel(e.target.value)}
+						onBlur={onChannelBlur}
+					/>
+				</div>
+				<div className="flex gap-2">
+					<Button
+						type="button"
+						className="cursor-pointer"
+						onClick={onClickClose}
+					>
+						<X />
+					</Button>
+					<Button
+						type="button"
+						className="cursor-pointer"
+						onClick={onClickReload}
+					>
+						<RotateCcw />
+					</Button>
+				</div>
 			</div>
 			{PlayerComponent}
 		</div>
