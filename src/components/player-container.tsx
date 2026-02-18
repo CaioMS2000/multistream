@@ -3,7 +3,7 @@ import { type JSX, memo, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
-import { useHistoryStore } from '@/store/history'
+import { useStreamManager } from '@/hooks/use-stream-manager'
 import { useStreamsStore } from '@/store/streams'
 import { KickPlayer } from './players/kick-player'
 import { TwitchPlayer } from './players/twitch-player'
@@ -28,11 +28,8 @@ export const PlayerContainer = memo(function PlayerContainer({
 	stream,
 	streamIndex,
 }: PlayerContainerProps) {
-	const removeStream = useStreamsStore(state => state.removeStream)
-	const reloadStream = useStreamsStore(state => state.reloadStream)
-	const updateStream = useStreamsStore(state => state.updateStream)
 	const reloadKey = useStreamsStore(state => state.reloadKeys[streamIndex] ?? 0)
-	const addToHistory = useHistoryStore(state => state.addToHistory)
+	const { deactivate, change, reload } = useStreamManager()
 
 	const [channel, setChannel] = useState(stream.channel)
 	const [platform, setPlatform] = useState(stream.platform)
@@ -43,26 +40,23 @@ export const PlayerContainer = memo(function PlayerContainer({
 	}, [stream.channel, stream.platform])
 
 	function onClickClose() {
-		addToHistory(stream)
-		removeStream(streamIndex)
+		deactivate(streamIndex, stream)
 	}
 
 	function onClickReload() {
-		reloadStream(streamIndex)
+		reload(streamIndex)
 	}
 
 	function onChannelBlur() {
 		const trimmed = channel.trim()
 		if (trimmed && trimmed !== stream.channel) {
-			updateStream(streamIndex, { channel: trimmed })
-			reloadStream(streamIndex)
+			change(streamIndex, { channel: trimmed })
 		}
 	}
 
 	function onPlatformChange(value: string) {
 		setPlatform(value as STREAM_OPTION)
-		updateStream(streamIndex, { platform: value as STREAM_OPTION })
-		reloadStream(streamIndex)
+		change(streamIndex, { platform: value as STREAM_OPTION })
 	}
 
 	useEffect(() => {

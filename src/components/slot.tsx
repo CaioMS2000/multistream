@@ -1,5 +1,5 @@
 import type { Stream } from '@/@types'
-import { useStreamsStore } from '@/store/streams'
+import { useStreamManager } from '@/hooks/use-stream-manager'
 import { memo, useState, type JSX } from 'react'
 import { PlayerContainer } from './player-container'
 
@@ -18,7 +18,7 @@ export const Slot = memo(function Slot({
 	width,
 	height,
 }: SlotProps) {
-	const swapSlots = useStreamsStore(state => state.swapSlots)
+	const { swap } = useStreamManager()
 	const [isDragOver, setIsDragOver] = useState(false)
 	const hasContent = stream !== null
 	let ChildComponent: JSX.Element = (
@@ -58,7 +58,7 @@ export const Slot = memo(function Slot({
 				e.preventDefault()
 				setIsDragOver(false)
 				const fromIndex = Number(e.dataTransfer.getData('text/plain'))
-				swapSlots(fromIndex, slotIndex)
+				swap(fromIndex, slotIndex)
 			}}
 		>
 			{ChildComponent}
