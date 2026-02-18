@@ -1,63 +1,73 @@
-# Multistream
+# React + TypeScript + Vite
 
-Aplicativo web para assistir múltiplas lives ao mesmo tempo nas plataformas Twitch e Kick. Permite adicionar canais por nome ou URL, organizar por drag and drop, definir número de colunas, mutar/desmutar globalmente e compartilhar o layout via link com parâmetros na URL.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Visão Geral
-- Stack: React + Vite + Tailwind CSS + Radix UI.
-- Suporte a Twitch e Kick via players embutidos.
-- Reordenação por arrastar e soltar das janelas.
-- Controle de colunas (1–4) e mute global.
-- Link de compartilhamento mantém sua configuração atual.
+Currently, two official plugins are available:
 
-## Como Usar
-- Campo “Plataforma”: selecione Twitch ou Kick.
-- Campo “canal”: informe o slug do canal (ex.: `xqc`) ou cole a URL do canal (ex.: `https://twitch.tv/xqc`).
-- Clique em “Adicionar” ou tecle Enter para inserir o canal.
-- Arraste as janelas para reordenar. Use o seletor de colunas e o botão de mute global conforme necessário.
-- Clique em “Copiar link” para compartilhar o layout atual.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Parâmetros de URL
-A página mantém o estado no URL para facilitar compartilhamento.
-- `streams`: lista ordenada separada por vírgulas. Cada item é `t:<canal>` (Twitch) ou `k:<canal>` (Kick). Ex.: `?streams=t:xqc,k:trainwreckstv`.
-- `cols`: número de colunas (1–4). Padrão: `2`. Ex.: `?cols=3`.
-- `muted`: flag presente significa mudo global. Ex.: `?muted`.
-- Compatibilidade: também aceita `twitch=<a,b>` e `kick=<c,d>`, mas ao atualizar o estado a app passa a usar apenas `streams`.
+## React Compiler
 
-## Desenvolvimento
-Pré‑requisitos
-- Node.js LTS (18+) e npm.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-Scripts
-- `npm run dev`: inicia o Vite em modo dev (porta 5174).
-- `npm run build`: build de produção para `dist/`.
-- `npm run preview`: serve o build localmente.
-- `npm run lint` / `npm run format`: checagem e formatação com Biome.
+## Expanding the ESLint configuration
 
-Alias e CSS
-- Alias `@` aponta para `src/` (veja `vite.config.ts`).
-- Tailwind CSS v4 configurado (veja `index.css`, `src/` e `@tailwindcss/vite`).
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## Build e Deploy
-Build estático
-- `npm ci && npm run build` gera a pasta `dist/` pronta para servir como site estático.
-- Consulte também `static-deploy.md` para dicas de deploy estático.
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-Docker
-- Imagem multi‑stage: build com Node e serving com Nginx (veja `Dockerfile`).
-- Subir com Docker Compose: `docker compose up --build` e acesse `http://localhost:5174`.
-- Alternativa: `docker build -t multistream:local .` e `docker run -p 5174:80 multistream:local`.
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## Dicas e Limitações
-- Twitch exige o parâmetro `parent` com o domínio onde o embed carrega; o app usa automaticamente `window.location.hostname`. Garanta que o domínio de deploy seja o domínio final de acesso.
-- Para Kick, o slug de canal é tratado em minúsculas.
-- O botão “Resetar layout” limpa canais, colunas, mute e parâmetros da URL.
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
 
-## Estrutura (resumo)
-- `src/App.tsx`: UI principal, gerenciamento de layout e URL params.
-- `src/components/TwitchPlayer.tsx`: integração com player da Twitch.
-- `src/components/KickPlayer.tsx`: integração com player da Kick.
-- `vite.config.ts`: plugins, aliases e Tailwind.
-- `docker-compose.yml`, `Dockerfile`, `nginx.conf`: opções de deploy via Docker/Nginx.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
----
-Sinta‑se à vontade para sugerir melhorias ou abrir issues.
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
