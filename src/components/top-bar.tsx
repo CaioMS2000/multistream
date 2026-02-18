@@ -1,7 +1,14 @@
 import { STREAM_OPTION } from '@/@types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
-import { ChevronDown, ChevronUp, Volume2, VolumeX } from 'lucide-react'
+import {
+	ChevronDown,
+	ChevronUp,
+	Minus,
+	Plus,
+	Volume2,
+	VolumeX,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
@@ -128,13 +135,34 @@ export function TopBar() {
 								control={form.control}
 								name="cols"
 								render={({ field }) => (
-									<Input
-										type="number"
-										placeholder="Columns"
-										className="w-12"
-										{...field}
-										onChange={e => field.onChange(Number(e.target.value))}
-									/>
+									<div className="flex items-center">
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											className="rounded-r-none w-8 h-9"
+											onClick={() =>
+												field.onChange(Math.max(1, field.value - 1))
+											}
+										>
+											<Minus className="w-3 h-3" />
+										</Button>
+										<Input
+											type="number"
+											className="w-10 h-9 rounded-none border-x-0 text-center"
+											{...field}
+											onChange={e => field.onChange(Number(e.target.value))}
+										/>
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											className="rounded-l-none w-8 h-9"
+											onClick={() => field.onChange(field.value + 1)}
+										>
+											<Plus className="w-3 h-3" />
+										</Button>
+									</div>
 								)}
 							/>
 							<Button
