@@ -28,9 +28,23 @@ export function useGridLayout(
 		const naturalPlayerHeight = Math.floor(playerWidth / ASPECT_RATIO)
 		const naturalRows = Math.floor(usableHeight / naturalPlayerHeight)
 		const rows = Math.max(naturalRows, Math.ceil(streamCount / cols), 1)
-		const playerHeight = Math.floor(usableHeight / rows)
+
+		let finalPlayerWidth = playerWidth
+		let playerHeight = Math.floor(playerWidth / ASPECT_RATIO)
+
+		if (playerHeight * rows > usableHeight) {
+			playerHeight = Math.floor(usableHeight / rows)
+			finalPlayerWidth = Math.floor(playerHeight * ASPECT_RATIO)
+		}
+
 		const totalSlots = cols * rows
 
-		return { cols, rows, totalSlots, playerWidth, playerHeight }
+		return {
+			cols,
+			rows,
+			totalSlots,
+			playerWidth: finalPlayerWidth,
+			playerHeight,
+		}
 	}, [cols, streamCount, width, height, insets.top, insets.right])
 }
