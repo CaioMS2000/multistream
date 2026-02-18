@@ -132,6 +132,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 						type="button"
 						variant="destructive"
 						size="icon"
+						className="dark:bg-destructive"
 						onClick={onClickClose}
 					>
 						<X />
