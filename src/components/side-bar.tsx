@@ -35,7 +35,7 @@ export function SideBar() {
 			{!open && (
 				<CollapsibleTrigger asChild>
 					<Button>
-						<ChevronLeft />
+						<History />
 					</Button>
 				</CollapsibleTrigger>
 			)}
