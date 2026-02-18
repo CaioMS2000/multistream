@@ -44,10 +44,21 @@ export const useStreamsStore = create<StreamsStore>()(set => ({
 		}),
 
 	addStream: stream =>
-		set(state => ({
-			streams: [...state.streams, stream],
-			reloadKeys: [...state.reloadKeys, 0],
-		})),
+		set(state => {
+			const newStreamIndex = state.streams.length
+			const firstEmptySlot = state.order.indexOf(-1)
+			const newOrder =
+				firstEmptySlot !== -1
+					? state.order.map((v, i) =>
+							i === firstEmptySlot ? newStreamIndex : v
+						)
+					: state.order
+			return {
+				streams: [...state.streams, stream],
+				order: newOrder,
+				reloadKeys: [...state.reloadKeys, 0],
+			}
+		}),
 
 	// Sentinel -1 marks an empty slot; indices above the removed one shift down
 	updateStream: (index, partial) =>

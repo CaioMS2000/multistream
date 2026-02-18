@@ -1,5 +1,6 @@
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
+import { useHistoryStore } from '@/store/history'
 import { useStreamsStore } from '@/store/streams'
 import { parseStreams } from '@/utils/parse-stream'
 
@@ -11,6 +12,7 @@ export function useSyncStreamsUrl(totalSlots: number) {
 	const streams = useStreamsStore(state => state.streams)
 	const initFromUrl = useStreamsStore(state => state.initFromUrl)
 	const resizeOrder = useStreamsStore(state => state.resizeOrder)
+	const removeFromHistory = useHistoryStore(state => state.removeFromHistory)
 	const initialized = useRef(false)
 
 	// URL → Store (mount only)
@@ -18,7 +20,9 @@ export function useSyncStreamsUrl(totalSlots: number) {
 	useEffect(() => {
 		if (initialized.current) return
 		initialized.current = true
-		initFromUrl(parseStreams(streamsRaw), totalSlots)
+		const parsed = parseStreams(streamsRaw)
+		initFromUrl(parsed, totalSlots)
+		for (const s of parsed) removeFromHistory(s)
 	}, [])
 
 	// Resize order when grid columns change
