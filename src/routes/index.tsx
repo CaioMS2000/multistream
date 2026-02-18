@@ -32,21 +32,18 @@ function Index() {
 
 	useSyncStreamsUrl(totalSlots)
 
+	const emptySlotIndices = order.flatMap((si, i) => (si === -1 ? [i] : []))
+
 	return (
 		<>
 			<TopBar />
 			<SideBar />
 			<Layout cols={colsCount} playerWidth={playerWidth}>
-				{order.map((streamIndex, slotIndex) => {
-					const stream =
-						streamIndex >= 0 ? (streams[streamIndex] ?? null) : null
-					const key = stream
-						? `${stream.platform}:${stream.channel}`
-						: `empty-${slotIndex}`
-
+				{streams.map((stream, streamIndex) => {
+					const slotIndex = order.indexOf(streamIndex)
 					return (
 						<Slot
-							key={key}
+							key={`${stream.platform}:${stream.channel}`}
 							stream={stream}
 							streamIndex={streamIndex}
 							slotIndex={slotIndex}
@@ -55,6 +52,16 @@ function Index() {
 						/>
 					)
 				})}
+				{emptySlotIndices.map(slotIndex => (
+					<Slot
+						key={`empty-${slotIndex}`}
+						stream={null}
+						streamIndex={-1}
+						slotIndex={slotIndex}
+						width={playerWidth}
+						height={playerHeight}
+					/>
+				))}
 			</Layout>
 		</>
 	)
