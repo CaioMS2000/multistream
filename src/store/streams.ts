@@ -10,6 +10,7 @@ interface StreamsStore {
 	resizeOrder: (totalSlots: number) => void
 	addStream: (stream: Stream) => void
 	removeStream: (streamIndex: number) => void
+	updateStream: (index: number, partial: Partial<Stream>) => void
 	reloadStream: (streamIndex: number) => void
 	swapSlots: (from: number, to: number) => void
 }
@@ -49,6 +50,13 @@ export const useStreamsStore = create<StreamsStore>()(set => ({
 		})),
 
 	// Sentinel -1 marks an empty slot; indices above the removed one shift down
+	updateStream: (index, partial) =>
+		set(state => {
+			const newStreams = [...state.streams]
+			newStreams[index] = { ...newStreams[index], ...partial }
+			return { streams: newStreams }
+		}),
+
 	removeStream: streamIndex =>
 		set(state => {
 			const newStreams = state.streams.filter((_, i) => i !== streamIndex)
