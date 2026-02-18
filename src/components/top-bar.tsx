@@ -33,7 +33,8 @@ const formSchema = z.object({
 const routeApi = getRouteApi('/')
 
 export function TopBar() {
-	const [open, setOpen] = useState(true)
+	const streams = useStreamsStore(state => state.streams)
+	const [open, setOpen] = useState(streams.length === 0)
 	const search = routeApi.useSearch()
 	const navigate = useNavigate()
 	const addStream = useStreamsStore(state => state.addStream)

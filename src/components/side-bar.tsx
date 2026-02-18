@@ -42,7 +42,7 @@ export function SideBar() {
 			<CollapsibleContent className="bg-card text-card-foreground border border-r-0 border-border rounded-l-lg p-4 overflow-y-auto">
 				<CollapsibleTrigger asChild>
 					<Button className="mb-4">
-						<ChevronRight />
+						<ChevronRight /> Histórico
 					</Button>
 				</CollapsibleTrigger>
 				{!historyEmpty &&
