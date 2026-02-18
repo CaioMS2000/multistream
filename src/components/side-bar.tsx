@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, History, Trash, Undo2 } from 'lucide-react'
+import { ChevronRight, History, Trash, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Stream } from '@/@types'
 import { useHistoryStore } from '@/store/history'
@@ -34,14 +34,14 @@ export function SideBar() {
 		>
 			{!open && (
 				<CollapsibleTrigger asChild>
-					<Button>
+					<Button variant="outline" size="icon">
 						<History />
 					</Button>
 				</CollapsibleTrigger>
 			)}
 			<CollapsibleContent className="bg-card text-card-foreground border border-r-0 border-border rounded-l-lg p-4 overflow-y-auto">
 				<CollapsibleTrigger asChild>
-					<Button className="mb-4">
+					<Button variant="outline" className="mb-4">
 						<ChevronRight /> Histórico
 					</Button>
 				</CollapsibleTrigger>
@@ -51,14 +51,34 @@ export function SideBar() {
 						return (
 							<div key={key} className="flex space-x-2 items-center">
 								<div className="flex gap-2">
-									<Button onClick={() => onRestore(stream)}>
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={() => onRestore(stream)}
+									>
 										<Undo2 />
 									</Button>
-									<Button onClick={() => onRemove(stream)}>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-destructive hover:bg-destructive/10"
+										onClick={() => onRemove(stream)}
+									>
 										<Trash />
 									</Button>
 								</div>
-								<p>{stream.channel}</p>
+								<div className="flex flex-col">
+									<p className="text-sm">{stream.channel}</p>
+									<span
+										className={
+											stream.platform === 'twitch'
+												? 'text-xs text-purple-500'
+												: 'text-xs text-green-500'
+										}
+									>
+										{stream.platform}
+									</span>
+								</div>
 							</div>
 						)
 					})}

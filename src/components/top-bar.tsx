@@ -86,7 +86,9 @@ export function TopBar() {
 				<div className="relative flex flex-col p-2">
 					<div className="flex justify-end">
 						<CollapsibleTrigger asChild className="absolute z-20">
-							<Button>{open ? <ChevronUp /> : <ChevronDown />}</Button>
+							<Button variant="outline" size="icon">
+								{open ? <ChevronUp /> : <ChevronDown />}
+							</Button>
 						</CollapsibleTrigger>
 					</div>
 					<CollapsibleContent>
@@ -118,7 +120,9 @@ export function TopBar() {
 									<Input placeholder="Channel" className="w-64" {...field} />
 								)}
 							/>
-							<Button type="submit">Adicionar</Button>
+							<Button type="submit" variant="outline">
+								Adicionar
+							</Button>
 							<Separator orientation="vertical" className="h-5 mx-1" />
 							<Controller
 								control={form.control}

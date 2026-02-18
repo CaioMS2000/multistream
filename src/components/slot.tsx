@@ -22,7 +22,7 @@ export const Slot = memo(function Slot({
 	const [isDragOver, setIsDragOver] = useState(false)
 	const hasContent = stream !== null
 	let ChildComponent: JSX.Element = (
-		<span className="text-gray-700 text-xs">vazio</span>
+		<span className="text-muted-foreground/60 text-xs">vazio</span>
 	)
 
 	if (hasContent) {
@@ -38,10 +38,10 @@ export const Slot = memo(function Slot({
 			style={{ width, height }}
 			className={`overflow-hidden border rounded-lg flex items-center justify-center transition-colors ${
 				isDragOver
-					? 'border-blue-500 bg-blue-500/10'
+					? 'border-indigo-500 bg-indigo-500/10'
 					: hasContent
-						? 'border-gray-500 bg-black'
-						: 'border-dashed border-gray-700 bg-black/50'
+						? 'border-border bg-black'
+						: 'border-dashed border-border bg-black/50'
 			}`}
 			draggable={hasContent}
 			onDragStart={e => {
