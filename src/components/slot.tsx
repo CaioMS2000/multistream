@@ -35,7 +35,7 @@ export const Slot = memo(function Slot({
 		// biome-ignore lint/a11y/useSemanticElements: drag-and-drop container, not a semantic list
 		<div
 			role="listitem"
-			style={{ width, height }}
+			style={{ width, height, order: slotIndex }}
 			className={`overflow-hidden border rounded-lg flex items-center justify-center transition-colors ${
 				isDragOver
 					? 'border-indigo-500 bg-indigo-500/10'
