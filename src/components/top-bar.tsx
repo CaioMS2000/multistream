@@ -126,7 +126,7 @@ export function TopBar() {
 									<Input
 										type="number"
 										placeholder="Columns"
-										className="w-24"
+										className="w-12"
 										{...field}
 										onChange={e => field.onChange(Number(e.target.value))}
 									/>
