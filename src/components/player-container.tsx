@@ -101,10 +101,10 @@ export const PlayerContainer = memo(function PlayerContainer({
 			<div className="flex absolute justify-between w-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
 				<div className="flex gap-1 items-center">
 					<Select value={platform} onValueChange={onPlatformChange}>
-						<SelectTrigger className="bg-card">
+						<SelectTrigger className="bg-card hover:bg-card dark:bg-card dark:hover:bg-card">
 							<SelectValue />
 						</SelectTrigger>
-						<SelectContent className="bg-card">
+						<SelectContent className="bg-card dark:bg-card">
 							<SelectGroup>
 								{STREAM_OPTION.map(option => (
 									<SelectItem key={option} value={option}>
@@ -114,13 +114,18 @@ export const PlayerContainer = memo(function PlayerContainer({
 							</SelectGroup>
 						</SelectContent>
 					</Select>
-					<Input
-						type="text"
-						className="field-sizing-content bg-card"
-						value={channel}
-						onChange={e => setChannel(e.target.value)}
-						onBlur={onChannelBlur}
-					/>
+					<div className="inline-grid grid-cols-[min-content] *:col-start-1 *:row-start-1">
+						<span className="invisible px-3 py-1 text-sm whitespace-pre">
+							{channel || ' '}
+						</span>
+						<Input
+							type="text"
+							className="bg-card dark:bg-card pr-1"
+							value={channel}
+							onChange={e => setChannel(e.target.value)}
+							onBlur={onChannelBlur}
+						/>
+					</div>
 				</div>
 				<div className="flex gap-2">
 					<Button
@@ -133,8 +138,9 @@ export const PlayerContainer = memo(function PlayerContainer({
 					</Button>
 					<Button
 						type="button"
-						variant="ghost"
+						variant="outline"
 						size="icon"
+						className="bg-card dark:bg-card"
 						onClick={onClickReload}
 					>
 						<RotateCcw />
