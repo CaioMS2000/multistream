@@ -44,12 +44,15 @@ export function SideBar() {
 						<ChevronRight /> Histórico
 					</Button>
 				</CollapsibleTrigger>
-				<div className="flex-1 overflow-auto min-h-0">
+				<div className="flex-1 overflow-auto min-h-0 space-y-2">
 					{!historyEmpty &&
 						history.map((stream, index) => {
 							const key = index
 							return (
-								<div key={key} className="flex space-x-2 items-center">
+								<div
+									key={key}
+									className="flex space-x-2 items-center border-zinc-700 border-2 rounded-lg p-2"
+								>
 									<div className="flex gap-2">
 										<Button
 											variant="ghost"

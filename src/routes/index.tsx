@@ -23,11 +23,12 @@ export const Route = createFileRoute('/')({
 function Index() {
 	const { cols: colsCount } = Route.useSearch()
 	const streams = useStreamsStore(state => state.streams)
-	const { playerWidth, playerHeight } = useGridLayout(
+	const { playerWidth, playerHeight, rows } = useGridLayout(
 		colsCount,
 		streams.length,
 		UI_INSETS
 	)
+	const emptySlots = rows * colsCount - streams.length
 
 	useLoadStreams()
 
@@ -36,16 +37,22 @@ function Index() {
 			<TopBar />
 			<SideBar />
 			<Layout cols={colsCount} playerWidth={playerWidth}>
-				{streams.map((stream, streamIndex) => {
-					return (
-						<Slot
-							key={`${stream.platform}:${stream.channel}`}
-							stream={stream}
-							width={playerWidth}
-							height={playerHeight}
-						/>
-					)
-				})}
+				{streams.map(stream => (
+					<Slot
+						key={`${stream.platform}:${stream.channel}`}
+						stream={stream}
+						width={playerWidth}
+						height={playerHeight}
+					/>
+				))}
+				{Array.from({ length: emptySlots }, (_, i) => (
+					<Slot
+						key={`empty-${i}`}
+						stream={null}
+						width={playerWidth}
+						height={playerHeight}
+					/>
+				))}
 			</Layout>
 		</>
 	)
