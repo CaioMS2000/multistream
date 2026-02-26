@@ -25,7 +25,8 @@ type PlayerContainerProps = {
 export const PlayerContainer = memo(function PlayerContainer({
 	stream,
 }: PlayerContainerProps) {
-	const { removeStream } = useStreamManager()
+	const [reloadKey, setReloadKey] = useState(0)
+	const { deactivateToHistory, replaceStream } = useStreamManager()
 	const [channel, setChannel] = useState(stream.channel)
 	const [platform, setPlatform] = useState(stream.platform)
 
@@ -35,14 +36,30 @@ export const PlayerContainer = memo(function PlayerContainer({
 	}, [stream.channel, stream.platform])
 
 	function onClickClose() {
-		removeStream(stream.platform, stream.channel)
+		deactivateToHistory(stream)
 	}
 
-	function onClickReload() {}
+	function onClickReload() {
+		setReloadKey(k => k + 1)
+	}
 
-	function onChannelBlur() {}
+	function onChannelBlur() {
+		replaceStream({
+			newChannel: channel,
+			newPlatform: platform as STREAM_OPTION,
+			oldChannel: stream.channel,
+			oldPlatform: stream.platform,
+		})
+	}
 
-	function onPlatformChange(value: string) {}
+	function onPlatformChange(value: string) {
+		replaceStream({
+			newChannel: channel,
+			newPlatform: value as STREAM_OPTION,
+			oldChannel: stream.channel,
+			oldPlatform: stream.platform,
+		})
+	}
 
 	useEffect(() => {
 		if (!STREAM_OPTION.includes(stream.platform as STREAM_OPTION)) {
@@ -55,7 +72,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 		case 'twitch':
 			PlayerComponent = (
 				<TwitchPlayer
-					key={`${stream.platform}:${stream.channel}`}
+					key={`${stream.platform}:${stream.channel}:${reloadKey}`}
 					channel={stream.channel}
 				/>
 			)
@@ -63,7 +80,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 		case 'kick':
 			PlayerComponent = (
 				<KickPlayer
-					key={`${stream.platform}:${stream.channel}`}
+					key={`${stream.platform}:${stream.channel}:${reloadKey}`}
 					channel={stream.channel}
 				/>
 			)

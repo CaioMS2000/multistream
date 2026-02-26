@@ -7,7 +7,7 @@ import { TopBar } from '@/components/top-bar'
 import { SideBar } from '@/components/side-bar'
 import { useGridLayout } from '@/hooks/use-grid-layout'
 import { useStreamsStore } from '@/store/streams'
-import { useStreamManager } from '@/hooks/use-stream-manager'
+import { useLoadStreams } from '@/hooks/use-load-streams'
 
 const searchSchema = z.object({
 	cols: z.number().min(1).default(2),
@@ -29,7 +29,7 @@ function Index() {
 		UI_INSETS
 	)
 
-	useStreamManager()
+	useLoadStreams()
 
 	return (
 		<>
