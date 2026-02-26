@@ -12,7 +12,6 @@ import {
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
-import { useStreamManager } from '@/hooks/use-stream-manager'
 import { Button } from './ui/button'
 import {
 	Collapsible,
@@ -29,6 +28,8 @@ import {
 	SelectValue,
 } from './ui/select'
 import { Separator } from './ui/separator'
+import { useStreamsStore } from '@/store/streams'
+import { useStreamManager } from '@/hooks/use-stream-manager'
 
 const formSchema = z.object({
 	channel: z.string(),
@@ -40,15 +41,18 @@ const formSchema = z.object({
 const routeApi = getRouteApi('/')
 
 export function TopBar() {
+	const { addStream } = useStreamManager()
+	const streams = useStreamsStore(state => state.streams)
+	const lastElement = streams[streams.length - 1]
+	console.log('lastElement:', lastElement)
 	const search = routeApi.useSearch()
 	const [open, setOpen] = useState(!search.streams)
 	const navigate = useNavigate()
-	const { activate } = useStreamManager()
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			channel: '',
-			platform: '',
+			platform: lastElement?.platform ?? '',
 			cols: search.cols,
 			muted: search.muted,
 		},
@@ -74,7 +78,9 @@ export function TopBar() {
 				platform: data.platform as STREAM_OPTION,
 				channel: data.channel.trim(),
 			}
-			activate(stream)
+
+			addStream(stream.platform, stream.channel)
+
 			form.reset({
 				channel: '',
 				cols: data.cols,

@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useWindowSize } from './use-window-size'
 
 const ASPECT_RATIO = 1.777777777777778 as const // 16 / 9
@@ -8,43 +7,34 @@ export function useGridLayout(
 	streamCount = 0,
 	insets: { top?: number; right?: number } = {}
 ) {
-	const { width, height } = useWindowSize()
+	let { width, height } = useWindowSize()
 
-	return useMemo(() => {
-		if (cols <= 0) {
-			return {
-				cols: 0,
-				rows: 0,
-				totalSlots: 0,
-				playerWidth: 0,
-				playerHeight: 0,
-			}
-		}
-
-		const usableWidth = width - (insets.right ?? 0)
-		const usableHeight = height - (insets.top ?? 0)
-
-		const playerWidth = Math.floor(usableWidth / cols)
-		const naturalPlayerHeight = Math.floor(playerWidth / ASPECT_RATIO)
-		const naturalRows = Math.floor(usableHeight / naturalPlayerHeight)
-		const rows = Math.max(naturalRows, Math.ceil(streamCount / cols), 1)
-
-		let finalPlayerWidth = playerWidth
-		let playerHeight = Math.floor(playerWidth / ASPECT_RATIO)
-
-		if (playerHeight * rows > usableHeight) {
-			playerHeight = Math.floor(usableHeight / rows)
-			finalPlayerWidth = Math.floor(playerHeight * ASPECT_RATIO)
-		}
-
-		const totalSlots = cols * rows
-
+	if (cols <= 0) {
 		return {
-			cols,
-			rows,
-			totalSlots,
-			playerWidth: finalPlayerWidth,
-			playerHeight,
+			cols: 0,
+			rows: 0,
+			totalSlots: 0,
+			playerWidth: 0,
+			playerHeight: 0,
 		}
-	}, [cols, streamCount, width, height, insets.top, insets.right])
+	}
+
+	width = width - (insets.right ?? 0)
+	height = height - (insets.top ?? 0)
+
+	const rows = Math.ceil(streamCount / cols)
+	let playerWidth = width / cols
+	let playerHeight = playerWidth / ASPECT_RATIO
+
+	if (playerHeight * rows > height) {
+		playerHeight = height / rows
+		playerWidth = playerHeight * ASPECT_RATIO
+	}
+
+	return {
+		cols,
+		rows,
+		playerWidth,
+		playerHeight,
+	}
 }

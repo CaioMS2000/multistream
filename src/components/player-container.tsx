@@ -3,8 +3,6 @@ import { type JSX, memo, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
-import { useStreamManager } from '@/hooks/use-stream-manager'
-import { useStreamsStore } from '@/store/streams'
 import { KickPlayer } from './players/kick-player'
 import { TwitchPlayer } from './players/twitch-player'
 import { Button } from './ui/button'
@@ -18,19 +16,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './ui/select'
+import { useStreamManager } from '@/hooks/use-stream-manager'
 
 type PlayerContainerProps = {
 	stream: Stream
-	streamIndex: number
 }
 
 export const PlayerContainer = memo(function PlayerContainer({
 	stream,
-	streamIndex,
 }: PlayerContainerProps) {
-	const reloadKey = useStreamsStore(state => state.reloadKeys[streamIndex] ?? 0)
-	const { deactivate, change, reload } = useStreamManager()
-
+	const { removeStream } = useStreamManager()
 	const [channel, setChannel] = useState(stream.channel)
 	const [platform, setPlatform] = useState(stream.platform)
 
@@ -40,24 +35,14 @@ export const PlayerContainer = memo(function PlayerContainer({
 	}, [stream.channel, stream.platform])
 
 	function onClickClose() {
-		deactivate(streamIndex, stream)
+		removeStream(stream.platform, stream.channel)
 	}
 
-	function onClickReload() {
-		reload(streamIndex)
-	}
+	function onClickReload() {}
 
-	function onChannelBlur() {
-		const trimmed = channel.trim()
-		if (trimmed && trimmed !== stream.channel) {
-			change(streamIndex, { channel: trimmed })
-		}
-	}
+	function onChannelBlur() {}
 
-	function onPlatformChange(value: string) {
-		setPlatform(value as STREAM_OPTION)
-		change(streamIndex, { platform: value as STREAM_OPTION })
-	}
+	function onPlatformChange(value: string) {}
 
 	useEffect(() => {
 		if (!STREAM_OPTION.includes(stream.platform as STREAM_OPTION)) {
@@ -69,11 +54,19 @@ export const PlayerContainer = memo(function PlayerContainer({
 	switch (stream.platform) {
 		case 'twitch':
 			PlayerComponent = (
-				<TwitchPlayer key={reloadKey} channel={stream.channel} />
+				<TwitchPlayer
+					key={`${stream.platform}:${stream.channel}`}
+					channel={stream.channel}
+				/>
 			)
 			break
 		case 'kick':
-			PlayerComponent = <KickPlayer key={reloadKey} channel={stream.channel} />
+			PlayerComponent = (
+				<KickPlayer
+					key={`${stream.platform}:${stream.channel}`}
+					channel={stream.channel}
+				/>
+			)
 			break
 		default: {
 			const _exhaustive: never = stream.platform

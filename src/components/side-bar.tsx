@@ -2,7 +2,6 @@ import { ChevronRight, History, Trash, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Stream } from '@/@types'
 import { useHistoryStore } from '@/store/history'
-import { useStreamManager } from '@/hooks/use-stream-manager'
 import { Button } from './ui/button'
 import {
 	Collapsible,
@@ -13,16 +12,11 @@ import {
 export function SideBar() {
 	const [open, setOpen] = useState(false)
 	const history = useHistoryStore(state => state.history)
-	const { activate, dismissHistory } = useStreamManager()
 	const historyEmpty = history.length === 0
 
-	function onRestore(stream: Stream) {
-		activate(stream)
-	}
+	function onRestore(stream: Stream) {}
 
-	function onRemove(stream: Stream) {
-		dismissHistory(stream)
-	}
+	function onRemove(stream: Stream) {}
 
 	return (
 		<Collapsible
