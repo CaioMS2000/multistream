@@ -4,7 +4,7 @@ const ASPECT_RATIO = 1.777777777777778 as const // 16 / 9
 
 export function useGridLayout(
 	cols: number,
-	streamCount = 0,
+	totalSlots = 0,
 	insets: { top?: number; right?: number } = {}
 ) {
 	let { width, height } = useWindowSize()
@@ -22,7 +22,7 @@ export function useGridLayout(
 	width = width - (insets.right ?? 0)
 	height = height - (insets.top ?? 0)
 
-	const rows = Math.ceil(streamCount / cols)
+	const rows = Math.max(1, Math.ceil(totalSlots / cols))
 	let playerWidth = width / cols
 	let playerHeight = playerWidth / ASPECT_RATIO
 
@@ -34,6 +34,7 @@ export function useGridLayout(
 	return {
 		cols,
 		rows,
+		totalSlots: rows * cols,
 		playerWidth,
 		playerHeight,
 	}

@@ -1,6 +1,11 @@
 import type { Stream } from '@/@types'
 import { useHistoryStore } from '@/store/history'
+import { parseStreams } from '@/utils/parse-stream'
 import { getRouteApi } from '@tanstack/react-router'
+
+function serializeStreams(streams: Stream[]): string {
+	return streams.map(s => `${s.platform}:${s.channel}@${s.slot}`).join(',')
+}
 
 export function useStreamManager() {
 	const routeApi = getRouteApi('/')
@@ -8,26 +13,40 @@ export function useStreamManager() {
 	const addToHistory = useHistoryStore(s => s.addToHistory)
 	const removeFromHistory = useHistoryStore(s => s.removeFromHistory)
 
-	function addStream(platform: string, channel: string) {
+	function getParsedStreams(raw: string): Stream[] {
+		return parseStreams(raw)
+	}
+
+	function addStream(platform: string, channel: string, slot?: number) {
 		navigate({
-			search: prev => ({
-				...prev,
-				streams: prev.streams
-					? `${prev.streams},${platform}:${channel}`
-					: `${platform}:${channel}`,
-			}),
+			search: prev => {
+				const streams = getParsedStreams(prev.streams)
+				const occupiedSlots = new Set(streams.map(s => s.slot))
+				const targetSlot = slot ?? findFirstEmptySlot(occupiedSlots)
+				return {
+					...prev,
+					streams: serializeStreams([
+						...streams,
+						{ platform, channel, slot: targetSlot } as Stream,
+					]),
+				}
+			},
 		})
 	}
 
 	function removeStream(platform: string, channel: string) {
 		navigate({
-			search: prev => ({
-				...prev,
-				streams: prev.streams
-					.split(',')
-					.filter(s => s !== `${platform}:${channel}`)
-					.join(','),
-			}),
+			search: prev => {
+				const streams = getParsedStreams(prev.streams)
+				return {
+					...prev,
+					streams: serializeStreams(
+						streams.filter(
+							s => !(s.platform === platform && s.channel === channel)
+						)
+					),
+				}
+			},
 		})
 	}
 
@@ -44,17 +63,41 @@ export function useStreamManager() {
 		newChannel,
 	}: ReplaceStreamParams) {
 		navigate({
-			search: prev => ({
-				...prev,
-				streams: prev.streams
-					.split(',')
-					.map(s =>
-						s === `${oldPlatform}:${oldChannel}`
-							? `${newPlatform}:${newChannel}`
-							: s
-					)
-					.join(','),
-			}),
+			search: prev => {
+				const streams = getParsedStreams(prev.streams)
+				return {
+					...prev,
+					streams: serializeStreams(
+						streams.map(s =>
+							s.platform === oldPlatform && s.channel === oldChannel
+								? ({
+										platform: newPlatform,
+										channel: newChannel,
+										slot: s.slot,
+									} as Stream)
+								: s
+						)
+					),
+				}
+			},
+		})
+	}
+
+	function swapSlots(slotA: number, slotB: number) {
+		navigate({
+			search: prev => {
+				const streams = getParsedStreams(prev.streams)
+				return {
+					...prev,
+					streams: serializeStreams(
+						streams.map(s => {
+							if (s.slot === slotA) return { ...s, slot: slotB }
+							if (s.slot === slotB) return { ...s, slot: slotA }
+							return s
+						})
+					),
+				}
+			},
 		})
 	}
 
@@ -72,7 +115,14 @@ export function useStreamManager() {
 		addStream,
 		removeStream,
 		replaceStream,
+		swapSlots,
 		activateFromHistory,
 		deactivateToHistory,
 	}
+}
+
+function findFirstEmptySlot(occupied: Set<number>): number {
+	let slot = 0
+	while (occupied.has(slot)) slot++
+	return slot
 }

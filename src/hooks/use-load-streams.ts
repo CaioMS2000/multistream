@@ -6,38 +6,10 @@ import { parseStreams } from '@/utils/parse-stream'
 export function useLoadStreams() {
 	const routeApi = getRouteApi('/')
 	const { streams: streamsRaw } = routeApi.useSearch()
-	const addStreamToStore = useStreamsStore(s => s.addStream)
-	const removeStreamFromStore = useStreamsStore(s => s.removeStream)
-
-	// function loadFromURL(){
-	//     const parsed = parseStreams(streamsRaw)
-	//     console.log('Parsed streams from URL:', parsed)
-	//     const streamsToAdd = parsed.filter(s => !streams.some(existing => existing.platform === s.platform && existing.channel === s.channel))
-	//     const streamsToRemove = streams.filter(s => !parsed.some(p => p.platform === s.platform && p.channel === s.channel))
-
-	//     streamsToAdd.forEach(addStream)
-	// biome-ignore lint/suspicious/useIterableCallbackReturn: i know whats going on here
-	//     streamsToRemove.forEach(s => removeStream(s.platform, s.channel))
-	// }
+	const setStreams = useStreamsStore(s => s.setStreams)
 
 	useEffect(() => {
-		const streams = useStreamsStore.getState().streams
 		const parsed = parseStreams(streamsRaw)
-
-		const streamsToAdd = parsed.filter(
-			s =>
-				!streams.some(
-					existing =>
-						existing.platform === s.platform && existing.channel === s.channel
-				)
-		)
-		const streamsToRemove = streams.filter(
-			s =>
-				!parsed.some(p => p.platform === s.platform && p.channel === s.channel)
-		)
-
-		streamsToAdd.forEach(addStreamToStore)
-		// biome-ignore lint/suspicious/useIterableCallbackReturn: i know whats going on here
-		streamsToRemove.forEach(s => removeStreamFromStore(s.platform, s.channel))
-	}, [streamsRaw, addStreamToStore, removeStreamFromStore])
+		setStreams(parsed)
+	}, [streamsRaw, setStreams])
 }
