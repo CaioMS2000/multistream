@@ -15,9 +15,9 @@ import { Slot } from '@/components/slot'
 import { TopBar } from '@/components/top-bar'
 import { SideBar } from '@/components/side-bar'
 import { useGridLayout } from '@/hooks/use-grid-layout'
-import { useStreamsStore } from '@/store/streams'
 import { useLoadStreams } from '@/hooks/use-load-streams'
 import { useStreamManager } from '@/hooks/use-stream-manager'
+import { parseStreams } from '@/utils/parse-stream'
 import type { Stream } from '@/@types'
 
 const searchSchema = z.object({
@@ -32,8 +32,8 @@ export const Route = createFileRoute('/')({
 })
 
 function Index() {
-	const { cols: colsCount } = Route.useSearch()
-	const streams = useStreamsStore(state => state.streams)
+	const { cols: colsCount, streams: streamsRaw } = Route.useSearch()
+	const streams = parseStreams(streamsRaw)
 	const { swapSlots } = useStreamManager()
 	const [isDragging, setIsDragging] = useState(false)
 

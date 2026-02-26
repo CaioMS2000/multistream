@@ -38,13 +38,15 @@ export function useStreamManager() {
 		navigate({
 			search: prev => {
 				const streams = getParsedStreams(prev.streams)
+				const filtered = streams.filter(
+					s => !(s.platform === platform && s.channel === channel)
+				)
+				const compacted = filtered
+					.sort((a, b) => a.slot - b.slot)
+					.map((s, i) => ({ ...s, slot: i }))
 				return {
 					...prev,
-					streams: serializeStreams(
-						streams.filter(
-							s => !(s.platform === platform && s.channel === channel)
-						)
-					),
+					streams: serializeStreams(compacted),
 				}
 			},
 		})
