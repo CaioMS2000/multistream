@@ -1,4 +1,5 @@
-import { RotateCcw, X } from 'lucide-react'
+import { getRouteApi } from '@tanstack/react-router'
+import { RotateCcw, Volume2, VolumeX, X } from 'lucide-react'
 import { type JSX, memo, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Stream } from '@/@types'
@@ -22,13 +23,21 @@ type PlayerContainerProps = {
 	stream: Stream
 }
 
+const routeApi = getRouteApi('/')
+
 export const PlayerContainer = memo(function PlayerContainer({
 	stream,
 }: PlayerContainerProps) {
+	const { muted: globalMuted } = routeApi.useSearch()
 	const [reloadKey, setReloadKey] = useState(0)
+	const [muted, setMuted] = useState(globalMuted)
 	const { deactivateToHistory, replaceStream } = useStreamManager()
 	const [channel, setChannel] = useState(stream.channel)
 	const [platform, setPlatform] = useState(stream.platform)
+
+	useEffect(() => {
+		setMuted(globalMuted)
+	}, [globalMuted])
 
 	useEffect(() => {
 		setChannel(stream.channel)
@@ -74,6 +83,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 				<TwitchPlayer
 					key={`${stream.platform}:${stream.channel}:${reloadKey}`}
 					channel={stream.channel}
+					muted={muted}
 				/>
 			)
 			break
@@ -82,6 +92,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 				<KickPlayer
 					key={`${stream.platform}:${stream.channel}:${reloadKey}`}
 					channel={stream.channel}
+					muted={muted}
 				/>
 			)
 			break
@@ -140,6 +151,15 @@ export const PlayerContainer = memo(function PlayerContainer({
 						onClick={onClickClose}
 					>
 						<X />
+					</Button>
+					<Button
+						type="button"
+						variant="outline"
+						size="icon"
+						className="bg-card dark:bg-card"
+						onClick={() => setMuted(m => !m)}
+					>
+						{muted ? <VolumeX /> : <Volume2 />}
 					</Button>
 					<Button
 						type="button"
