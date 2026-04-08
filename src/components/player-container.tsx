@@ -3,6 +3,7 @@ import { type JSX, memo, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
+import { useStreamManager } from '@/hooks/use-stream-manager'
 import { KickPlayer } from './players/kick-player'
 import { TwitchPlayer } from './players/twitch-player'
 import { Button } from './ui/button'
@@ -16,7 +17,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from './ui/select'
-import { useStreamManager } from '@/hooks/use-stream-manager'
 
 type PlayerContainerProps = {
 	stream: Stream

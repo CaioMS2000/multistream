@@ -1,5 +1,5 @@
-import type { Stream } from '@/@types'
 import { create } from 'zustand'
+import type { Stream } from '@/@types'
 
 interface StreamsStore {
 	streams: Stream[]

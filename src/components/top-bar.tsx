@@ -1,4 +1,3 @@
-import { STREAM_OPTION } from '@/@types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import {
@@ -12,6 +11,9 @@ import {
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import z from 'zod'
+import { STREAM_OPTION } from '@/@types'
+import { useStreamManager } from '@/hooks/use-stream-manager'
+import { useStreamsStore } from '@/store/streams'
 import { Button } from './ui/button'
 import {
 	Collapsible,
@@ -28,8 +30,6 @@ import {
 	SelectValue,
 } from './ui/select'
 import { Separator } from './ui/separator'
-import { useStreamsStore } from '@/store/streams'
-import { useStreamManager } from '@/hooks/use-stream-manager'
 
 const formSchema = z.object({
 	channel: z.string(),

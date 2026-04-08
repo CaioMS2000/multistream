@@ -1,8 +1,8 @@
 import { ChevronRight, History, Trash, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 import type { Stream } from '@/@types'
-import { useHistoryStore } from '@/store/history'
 import { useStreamManager } from '@/hooks/use-stream-manager'
+import { useHistoryStore } from '@/store/history'
 import { Button } from './ui/button'
 import {
 	Collapsible,

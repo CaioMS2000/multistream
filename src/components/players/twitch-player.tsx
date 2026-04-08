@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { getRouteApi } from '@tanstack/react-router'
+import { useEffect, useRef } from 'react'
 
 declare global {
 	interface Window {
