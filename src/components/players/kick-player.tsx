@@ -1,13 +1,9 @@
-import { getRouteApi } from '@tanstack/react-router'
-
 export type KickPlayerProps = {
 	channel: string
+	muted: boolean
 }
 
-const routeApi = getRouteApi('/')
-
-export function KickPlayer({ channel }: KickPlayerProps) {
-	const { muted } = routeApi.useSearch()
+export function KickPlayer({ channel, muted }: KickPlayerProps) {
 	const safeChannel = channel.toLowerCase()
 	const src = `https://player.kick.com/${encodeURIComponent(safeChannel)}?autoplay=true${muted ? '&muted=true' : ''}`
 	return (

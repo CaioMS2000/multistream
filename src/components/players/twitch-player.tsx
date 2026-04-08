@@ -1,4 +1,3 @@
-import { getRouteApi } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 
 declare global {
@@ -9,10 +8,10 @@ declare global {
 
 export type TwitchPlayerProps = {
 	channel: string
+	muted: boolean
 }
 
 const parent = window.location.hostname
-const routeApi = getRouteApi('/')
 
 function loadScript(): Promise<any> {
 	if (window.Twitch && window.Twitch.Player)
@@ -43,8 +42,7 @@ function loadScript(): Promise<any> {
 	})
 }
 
-export function TwitchPlayer({ channel }: TwitchPlayerProps) {
-	const { muted } = routeApi.useSearch()
+export function TwitchPlayer({ channel, muted }: TwitchPlayerProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null)
 	const playerRef = useRef<any>(null)
 
