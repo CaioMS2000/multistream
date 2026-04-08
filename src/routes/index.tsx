@@ -38,7 +38,7 @@ function Index() {
 	const swap = useGridStore(s => s.swap)
 	const [isDragging, setIsDragging] = useState(false)
 
-	const minSlots = Math.max(streams.length, slotOrder.length)
+	const minSlots = streams.length
 
 	const { playerWidth, playerHeight, totalSlots } = useGridLayout(
 		colsCount,
