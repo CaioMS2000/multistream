@@ -4,7 +4,7 @@ import { useHistoryStore } from '@/store/history'
 import { parseStreams } from '@/utils/parse-stream'
 
 function serializeStreams(streams: Stream[]): string {
-	return streams.map(s => `${s.platform}:${s.channel}@${s.slot}`).join(',')
+	return streams.map(s => `${s.platform}:${s.channel}`).join(',')
 }
 
 export function useStreamManager() {
@@ -17,17 +17,15 @@ export function useStreamManager() {
 		return parseStreams(raw)
 	}
 
-	function addStream(platform: string, channel: string, slot?: number) {
+	function addStream(platform: string, channel: string) {
 		navigate({
 			search: prev => {
 				const streams = getParsedStreams(prev.streams)
-				const occupiedSlots = new Set(streams.map(s => s.slot))
-				const targetSlot = slot ?? findFirstEmptySlot(occupiedSlots)
 				return {
 					...prev,
 					streams: serializeStreams([
 						...streams,
-						{ platform, channel, slot: targetSlot } as Stream,
+						{ platform, channel } as Stream,
 					]),
 				}
 			},
@@ -41,12 +39,9 @@ export function useStreamManager() {
 				const filtered = streams.filter(
 					s => !(s.platform === platform && s.channel === channel)
 				)
-				const compacted = filtered
-					.sort((a, b) => a.slot - b.slot)
-					.map((s, i) => ({ ...s, slot: i }))
 				return {
 					...prev,
-					streams: serializeStreams(compacted),
+					streams: serializeStreams(filtered),
 				}
 			},
 		})
@@ -72,11 +67,7 @@ export function useStreamManager() {
 					streams: serializeStreams(
 						streams.map(s =>
 							s.platform === oldPlatform && s.channel === oldChannel
-								? ({
-										platform: newPlatform,
-										channel: newChannel,
-										slot: s.slot,
-									} as Stream)
+								? ({ platform: newPlatform, channel: newChannel } as Stream)
 								: s
 						)
 					),
@@ -102,10 +93,4 @@ export function useStreamManager() {
 		activateFromHistory,
 		deactivateToHistory,
 	}
-}
-
-function findFirstEmptySlot(occupied: Set<number>): number {
-	let slot = 0
-	while (occupied.has(slot)) slot++
-	return slot
 }
