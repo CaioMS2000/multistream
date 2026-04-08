@@ -1,7 +1,7 @@
+import { getRouteApi } from '@tanstack/react-router'
 import type { Stream } from '@/@types'
 import { useHistoryStore } from '@/store/history'
 import { parseStreams } from '@/utils/parse-stream'
-import { getRouteApi } from '@tanstack/react-router'
 
 function serializeStreams(streams: Stream[]): string {
 	return streams.map(s => `${s.platform}:${s.channel}@${s.slot}`).join(',')
@@ -85,24 +85,6 @@ export function useStreamManager() {
 		})
 	}
 
-	function swapSlots(slotA: number, slotB: number) {
-		navigate({
-			search: prev => {
-				const streams = getParsedStreams(prev.streams)
-				return {
-					...prev,
-					streams: serializeStreams(
-						streams.map(s => {
-							if (s.slot === slotA) return { ...s, slot: slotB }
-							if (s.slot === slotB) return { ...s, slot: slotA }
-							return s
-						})
-					),
-				}
-			},
-		})
-	}
-
 	function activateFromHistory(stream: Stream) {
 		removeFromHistory(stream)
 		addStream(stream.platform, stream.channel)
@@ -117,7 +99,6 @@ export function useStreamManager() {
 		addStream,
 		removeStream,
 		replaceStream,
-		swapSlots,
 		activateFromHistory,
 		deactivateToHistory,
 	}

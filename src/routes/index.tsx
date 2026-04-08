@@ -1,5 +1,3 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
 import {
 	DndContext,
 	type DragEndEvent,
@@ -8,17 +6,19 @@ import {
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core'
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { UI_INSETS } from '@/config/ui-insets'
+import { z } from 'zod'
 import { Layout } from '@/components/layout'
+import { PlayerContainer } from '@/components/player-container'
+import { SideBar } from '@/components/side-bar'
 import { Slot } from '@/components/slot'
 import { TopBar } from '@/components/top-bar'
-import { SideBar } from '@/components/side-bar'
+import { UI_INSETS } from '@/config/ui-insets'
 import { useGridLayout } from '@/hooks/use-grid-layout'
 import { useLoadStreams } from '@/hooks/use-load-streams'
-import { useStreamManager } from '@/hooks/use-stream-manager'
+import { useGridStore } from '@/store/grid'
 import { parseStreams } from '@/utils/parse-stream'
-import type { Stream } from '@/@types'
 
 const searchSchema = z.object({
 	cols: z.number().min(1).default(2),
@@ -34,12 +34,11 @@ export const Route = createFileRoute('/')({
 function Index() {
 	const { cols: colsCount, streams: streamsRaw } = Route.useSearch()
 	const streams = parseStreams(streamsRaw)
-	const { swapSlots } = useStreamManager()
+	const slotOrder = useGridStore(s => s.slotOrder)
+	const swap = useGridStore(s => s.swap)
 	const [isDragging, setIsDragging] = useState(false)
 
-	const maxSlot =
-		streams.length > 0 ? Math.max(...streams.map(s => s.slot)) : -1
-	const minSlots = maxSlot + 1
+	const minSlots = Math.max(streams.length, slotOrder.length)
 
 	const { playerWidth, playerHeight, totalSlots } = useGridLayout(
 		colsCount,
@@ -49,9 +48,10 @@ function Index() {
 
 	useLoadStreams()
 
-	const streamsBySlot = new Map<number, Stream>()
+	// Build a map from playerId to stream for quick lookup
+	const streamById = new Map<string, (typeof streams)[number]>()
 	for (const stream of streams) {
-		streamsBySlot.set(stream.slot, stream)
+		streamById.set(`${stream.platform}:${stream.channel}`, stream)
 	}
 
 	const sensors = useSensors(
@@ -68,24 +68,14 @@ function Index() {
 		setIsDragging(false)
 		const { active, over } = event
 		if (!over || active.id === over.id) return
-		const slotA = Number(active.id)
-		const slotB = Number(over.id)
-		swapSlots(slotA, slotB)
+		swap(Number(active.id), Number(over.id))
 	}
 
-	const slots = Array.from({ length: totalSlots }, (_, i) => {
-		const stream = streamsBySlot.get(i) ?? null
-		return (
-			<Slot
-				key={stream ? `${stream.platform}:${stream.channel}` : `empty-${i}`}
-				slotIndex={i}
-				stream={stream}
-				width={playerWidth}
-				height={playerHeight}
-				isDragging={isDragging}
-			/>
-		)
-	})
+	// Pad slotOrder to totalSlots for empty drop targets
+	const paddedOrder = Array.from(
+		{ length: totalSlots },
+		(_, i) => slotOrder[i] ?? null
+	)
 
 	return (
 		<>
@@ -96,8 +86,59 @@ function Index() {
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
-				<Layout cols={colsCount} playerWidth={playerWidth}>
-					{slots}
+				<Layout
+					cols={colsCount}
+					playerWidth={playerWidth}
+					playerHeight={playerHeight}
+				>
+					{/* Players — keyed by identity, positioned via CSS grid */}
+					{streams.map(stream => {
+						const playerId = `${stream.platform}:${stream.channel}`
+						const slotIndex = paddedOrder.indexOf(playerId)
+						if (slotIndex === -1) return null
+						const col = (slotIndex % colsCount) + 1
+						const row = Math.floor(slotIndex / colsCount) + 1
+
+						return (
+							<Slot
+								key={playerId}
+								slotIndex={slotIndex}
+								hasContent
+								width={playerWidth}
+								height={playerHeight}
+								isDragging={isDragging}
+								col={col}
+								row={row}
+							>
+								<PlayerContainer stream={stream} />
+							</Slot>
+						)
+					})}
+
+					{/* Empty slots — drop targets only */}
+					{paddedOrder.map((id, i) => {
+						if (id !== null) return null
+						const col = (i % colsCount) + 1
+						const row = Math.floor(i / colsCount) + 1
+						return (
+							<Slot
+								key={`empty-${i}`}
+								slotIndex={i}
+								hasContent={false}
+								width={playerWidth}
+								height={playerHeight}
+								isDragging={isDragging}
+								col={col}
+								row={row}
+							>
+								<div className="w-full h-full flex items-center justify-center">
+									<span className="text-muted-foreground/60 text-xs">
+										vazio
+									</span>
+								</div>
+							</Slot>
+						)
+					})}
 				</Layout>
 				<DragOverlay />
 			</DndContext>

@@ -1,24 +1,27 @@
-import type { Stream } from '@/@types'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
-import { PlayerContainer } from './player-container'
+import type React from 'react'
 
 type SlotProps = {
 	slotIndex: number
-	stream: Stream | null
+	hasContent: boolean
 	width: number
 	height: number
 	isDragging: boolean
+	col: number
+	row: number
+	children: React.ReactNode
 }
 
-export const Slot = function Slot({
+export function Slot({
 	slotIndex,
-	stream,
+	hasContent,
 	width,
 	height,
 	isDragging,
+	col,
+	row,
+	children,
 }: SlotProps) {
-	const hasContent = stream !== null
-
 	const { setNodeRef: setDropRef, isOver } = useDroppable({
 		id: slotIndex,
 	})
@@ -38,7 +41,7 @@ export const Slot = function Slot({
 		<div
 			ref={setDropRef}
 			role="listitem"
-			style={{ width, height }}
+			style={{ width, height, gridColumn: col, gridRow: row }}
 			className={`overflow-hidden border rounded-lg flex items-center justify-center transition-colors relative ${
 				isOver ? 'border-primary border-2' : ''
 			} ${isThisDragging ? 'opacity-50' : ''}`}
@@ -49,13 +52,7 @@ export const Slot = function Slot({
 				{...attributes}
 				className="w-full h-full"
 			>
-				{hasContent ? (
-					<PlayerContainer stream={stream} />
-				) : (
-					<div className="w-full h-full flex items-center justify-center">
-						<span className="text-muted-foreground/60 text-xs">vazio</span>
-					</div>
-				)}
+				{children}
 			</div>
 			{isDragging && hasContent && <div className="absolute inset-0 z-10" />}
 		</div>
