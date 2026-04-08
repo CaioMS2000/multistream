@@ -38,6 +38,9 @@ export function useLoadStreams() {
 			}
 		}
 
-		setOrder(next)
+		// Compact: remove all null gaps so the grid has no empty slots
+		const compacted = next.filter((id): id is string => id !== null)
+
+		setOrder(compacted)
 	}, [streamsRaw, setStreams, setOrder])
 }
