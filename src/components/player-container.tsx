@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { RotateCcw, Volume2, VolumeX, X } from 'lucide-react'
-import { type JSX, memo, useEffect, useState } from 'react'
+import { type JSX, memo, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import type { Stream } from '@/@types'
 import { STREAM_OPTION } from '@/@types'
@@ -35,9 +35,23 @@ export const PlayerContainer = memo(function PlayerContainer({
 	const [channel, setChannel] = useState(stream.channel)
 	const [platform, setPlatform] = useState(stream.platform)
 
+	const playerId = `${stream.platform}:${stream.channel}`
+
+	const renderCount = useRef(0)
+	renderCount.current += 1
+	console.log(`[PlayerContainer:${playerId}] render #${renderCount.current}`)
+
 	useEffect(() => {
+		console.log(`[PlayerContainer:${playerId}] mount`)
+		return () => console.log(`[PlayerContainer:${playerId}] unmount`)
+	}, [playerId])
+
+	useEffect(() => {
+		console.log(
+			`[PlayerContainer:${playerId}] sync effect fired: setMuted(${globalMuted})`
+		)
 		setMuted(globalMuted)
-	}, [globalMuted])
+	}, [globalMuted, playerId])
 
 	useEffect(() => {
 		setChannel(stream.channel)
@@ -157,7 +171,14 @@ export const PlayerContainer = memo(function PlayerContainer({
 						variant="outline"
 						size="icon"
 						className="bg-card dark:bg-card"
-						onClick={() => setMuted(m => !m)}
+						onClick={() =>
+							setMuted(m => {
+								console.log(
+									`[PlayerContainer:${playerId}] toggle button clicked: ${m} → ${!m}`
+								)
+								return !m
+							})
+						}
 					>
 						{muted ? <VolumeX /> : <Volume2 />}
 					</Button>

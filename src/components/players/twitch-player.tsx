@@ -48,6 +48,9 @@ export function TwitchPlayer({ channel, muted }: TwitchPlayerProps) {
 
 	useEffect(() => {
 		let cancelled = false
+		console.log(
+			`[TwitchPlayer:${channel}] mount effect; initial muted=${muted}`
+		)
 		loadScript().then(Twitch => {
 			if (cancelled || !containerRef.current) return
 			const opts = {
@@ -63,6 +66,9 @@ export function TwitchPlayer({ channel, muted }: TwitchPlayerProps) {
 			const P = Twitch.Player
 			try {
 				player.addEventListener(P.READY, () => {
+					console.log(
+						`[TwitchPlayer:${channel}] READY fired; applying muted=${muted} (from mount closure)`
+					)
 					try {
 						player.setMuted(muted)
 						player.setVolume(muted ? 0 : 0.5)
@@ -87,12 +93,15 @@ export function TwitchPlayer({ channel, muted }: TwitchPlayerProps) {
 
 	useEffect(() => {
 		const p = playerRef.current
+		console.log(
+			`[TwitchPlayer:${channel}] muted prop changed; playerRef ready=${!!p}; calling setMuted(${muted})`
+		)
 		if (!p) return
 		try {
 			p.setMuted(muted)
 			p.setVolume(muted ? 0 : 0.5)
 		} catch {}
-	}, [muted])
+	}, [muted, channel])
 
 	return <div ref={containerRef} className="w-full h-full" />
 }
