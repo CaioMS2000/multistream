@@ -25,6 +25,8 @@ type PlayerContainerProps = {
 
 const routeApi = getRouteApi('/')
 
+const t = () => `t=${performance.now().toFixed(0)}ms`
+
 export const PlayerContainer = memo(function PlayerContainer({
 	stream,
 }: PlayerContainerProps) {
@@ -39,16 +41,18 @@ export const PlayerContainer = memo(function PlayerContainer({
 
 	const renderCount = useRef(0)
 	renderCount.current += 1
-	console.log(`[PlayerContainer:${playerId}] render #${renderCount.current}`)
+	console.log(
+		`${t()} [PlayerContainer:${playerId}] render #${renderCount.current}`
+	)
 
 	useEffect(() => {
-		console.log(`[PlayerContainer:${playerId}] mount`)
-		return () => console.log(`[PlayerContainer:${playerId}] unmount`)
+		console.log(`${t()} [PlayerContainer:${playerId}] mount`)
+		return () => console.log(`${t()} [PlayerContainer:${playerId}] unmount`)
 	}, [playerId])
 
 	useEffect(() => {
 		console.log(
-			`[PlayerContainer:${playerId}] sync effect fired: setMuted(${globalMuted})`
+			`${t()} [PlayerContainer:${playerId}] sync effect fired: setMuted(${globalMuted})`
 		)
 		setMuted(globalMuted)
 	}, [globalMuted, playerId])
@@ -127,7 +131,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 
 	return (
 		<div className="relative w-full h-full group">
-			<div className="flex absolute justify-between w-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+			<div className="flex absolute justify-between w-full p-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
 				<div className="flex gap-1 items-center">
 					<Select value={platform} onValueChange={onPlatformChange}>
 						<SelectTrigger className="bg-card hover:bg-card dark:bg-card dark:hover:bg-card">
@@ -174,7 +178,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 						onClick={() =>
 							setMuted(m => {
 								console.log(
-									`[PlayerContainer:${playerId}] toggle button clicked: ${m} → ${!m}`
+									`${t()} [PlayerContainer:${playerId}] toggle button clicked: ${m} → ${!m}`
 								)
 								return !m
 							})

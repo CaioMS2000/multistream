@@ -7,7 +7,7 @@ import {
 	useSensors,
 } from '@dnd-kit/core'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { Layout } from '@/components/layout'
 import { PlayerContainer } from '@/components/player-container'
@@ -31,12 +31,29 @@ export const Route = createFileRoute('/')({
 	validateSearch: searchSchema,
 })
 
+const t = () => `t=${performance.now().toFixed(0)}ms`
+
 function Index() {
 	const { cols: colsCount, streams: streamsRaw } = Route.useSearch()
 	const streams = parseStreams(streamsRaw)
 	const slotOrder = useGridStore(s => s.slotOrder)
 	const swap = useGridStore(s => s.swap)
 	const [isDragging, setIsDragging] = useState(false)
+
+	useEffect(() => {
+		const onVis = () =>
+			console.log(`${t()} [page] visibilitychange: ${document.visibilityState}`)
+		const onFocus = () => console.log(`${t()} [page] window focus`)
+		const onBlur = () => console.log(`${t()} [page] window blur`)
+		document.addEventListener('visibilitychange', onVis)
+		window.addEventListener('focus', onFocus)
+		window.addEventListener('blur', onBlur)
+		return () => {
+			document.removeEventListener('visibilitychange', onVis)
+			window.removeEventListener('focus', onFocus)
+			window.removeEventListener('blur', onBlur)
+		}
+	}, [])
 
 	const minSlots = streams.length
 
