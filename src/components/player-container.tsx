@@ -131,7 +131,7 @@ export const PlayerContainer = memo(function PlayerContainer({
 
 	return (
 		<div className="relative w-full h-full group">
-			<div className="flex absolute justify-between w-full p-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+			<div className="flex absolute justify-between w-full p-1 z-1 opacity-0 group-hover:opacity-100 transition-opacity">
 				<div className="flex gap-1 items-center">
 					<Select value={platform} onValueChange={onPlatformChange}>
 						<SelectTrigger className="bg-card hover:bg-card dark:bg-card dark:hover:bg-card">
