@@ -31,3 +31,4 @@ temp/
 !README.md
 !RENDER-PLAYERS.md
 !GRID_LAYOUT_ALGORITHM.md
+!docs/**/*.md
