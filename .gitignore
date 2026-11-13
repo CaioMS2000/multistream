@@ -25,6 +25,7 @@ dist-ssr
 
 # others
 temp/
+*.py
 *.md
 *.sh
 *.txt
